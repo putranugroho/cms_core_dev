@@ -125,6 +125,200 @@ class CoreUsersRepository {
       );
     }
 
+
+
+    final hasProductTabungan = list.any((e) => e.matchesRoute('/setup/product-tabungan'));
+    if (!hasProductTabungan) {
+      list.add(
+        const CoreAccessModel(
+          id: null,
+          menuId: null,
+          userid: '',
+          modul: 'SETUP',
+          menu: 'Prod Tabungan',
+          submenu: 'Prod Tabungan',
+          subsubmenu: '',
+          routePath: '/setup/product-tabungan',
+          canView: false,
+          canCreate: false,
+          canUpdate: false,
+          canDelete: false,
+          canApprove: false,
+          canForceLogout: false,
+          flag: '',
+        ),
+      );
+    }
+
+    final hasProductDeposito = list.any((e) => e.matchesRoute('/setup/product-deposito'));
+    if (!hasProductDeposito) {
+      list.add(
+        const CoreAccessModel(
+          id: null,
+          menuId: null,
+          userid: '',
+          modul: 'SETUP',
+          menu: 'Prod Deposito',
+          submenu: 'Prod Deposito',
+          subsubmenu: '',
+          routePath: '/setup/product-deposito',
+          canView: false,
+          canCreate: false,
+          canUpdate: false,
+          canDelete: false,
+          canApprove: false,
+          canForceLogout: false,
+          flag: '',
+        ),
+      );
+    }
+
+
+    final fallbackMenus = <CoreAccessModel>[
+      const CoreAccessModel(
+        id: null,
+        menuId: null,
+        userid: '',
+        modul: 'SETUP',
+        menu: 'Format Buku Tabungan',
+        submenu: 'Format Buku Tabungan',
+        subsubmenu: '',
+        routePath: '/setup/format-buku',
+        canView: false,
+        canCreate: false,
+        canUpdate: false,
+        canDelete: false,
+        canApprove: false,
+        canForceLogout: false,
+        flag: '',
+      ),
+      const CoreAccessModel(
+        id: null,
+        menuId: null,
+        userid: '',
+        modul: 'SETUP',
+        menu: 'Format Cover Buku',
+        submenu: 'Format Cover Buku',
+        subsubmenu: '',
+        routePath: '/setup/format-cover',
+        canView: false,
+        canCreate: false,
+        canUpdate: false,
+        canDelete: false,
+        canApprove: false,
+        canForceLogout: false,
+        flag: '',
+      ),
+      const CoreAccessModel(
+        id: null,
+        menuId: null,
+        userid: '',
+        modul: 'SETUP',
+        menu: 'Format Bilyet Deposito',
+        submenu: 'Format Bilyet Deposito',
+        subsubmenu: '',
+        routePath: '/setup/format-bilyet',
+        canView: false,
+        canCreate: false,
+        canUpdate: false,
+        canDelete: false,
+        canApprove: false,
+        canForceLogout: false,
+        flag: '',
+      ),
+      const CoreAccessModel(
+        id: null,
+        menuId: null,
+        userid: '',
+        modul: 'SETUP',
+        menu: 'Sandi Transaksi Buku',
+        submenu: 'Sandi Transaksi Buku',
+        subsubmenu: '',
+        routePath: '/setup/sandi-transaksi-buku',
+        canView: false,
+        canCreate: false,
+        canUpdate: false,
+        canDelete: false,
+        canApprove: false,
+        canForceLogout: false,
+        flag: '',
+      ),
+      const CoreAccessModel(
+        id: null,
+        menuId: null,
+        userid: '',
+        modul: 'SETUP',
+        menu: 'Agunan',
+        submenu: 'Agunan',
+        subsubmenu: '',
+        routePath: '/setup/agunan',
+        canView: false,
+        canCreate: false,
+        canUpdate: false,
+        canDelete: false,
+        canApprove: false,
+        canForceLogout: false,
+        flag: '',
+      ),
+      const CoreAccessModel(
+        id: null,
+        menuId: null,
+        userid: '',
+        modul: 'SETUP',
+        menu: 'RAK',
+        submenu: 'RAK',
+        subsubmenu: '',
+        routePath: '/setup/rak',
+        canView: false,
+        canCreate: false,
+        canUpdate: false,
+        canDelete: false,
+        canApprove: false,
+        canForceLogout: false,
+        flag: '',
+      ),
+      const CoreAccessModel(
+        id: null,
+        menuId: null,
+        userid: '',
+        modul: 'SETUP',
+        menu: 'Rate RAK',
+        submenu: 'Rate RAK',
+        subsubmenu: '',
+        routePath: '/setup/rak/relasi',
+        canView: false,
+        canCreate: false,
+        canUpdate: false,
+        canDelete: false,
+        canApprove: false,
+        canForceLogout: false,
+        flag: '',
+      ),
+      const CoreAccessModel(
+        id: null,
+        menuId: null,
+        userid: '',
+        modul: 'SETUP',
+        menu: 'PPAP',
+        submenu: 'PPAP',
+        subsubmenu: '',
+        routePath: '/setup/bobot-ppap',
+        canView: false,
+        canCreate: false,
+        canUpdate: false,
+        canDelete: false,
+        canApprove: false,
+        canForceLogout: false,
+        flag: '',
+      ),
+    ];
+
+    for (final menu in fallbackMenus) {
+      if (!list.any((e) => e.matchesRoute(menu.routePath))) {
+        list.add(menu);
+      }
+    }
+
     return list;
   }
 

@@ -1,0 +1,7 @@
+services:
+  cms-core-web:
+    build: .
+    container_name: cms-core-web
+    restart: always
+    ports:
+      - "8097:80"

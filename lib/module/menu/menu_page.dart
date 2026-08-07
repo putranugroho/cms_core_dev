@@ -5,7 +5,12 @@ import 'package:accounting_kantor_gl_useraccess/module/master/ao/ao_page.dart';
 import 'package:accounting_kantor_gl_useraccess/module/menu/menu_notifier.dart';
 import 'package:accounting_kantor_gl_useraccess/module/menu/menu_widget.dart';
 import 'package:accounting_kantor_gl_useraccess/module/setup/kantor/kantor_page.dart';
+import 'package:accounting_kantor_gl_useraccess/module/setup/product_deposito/product_deposito_page.dart';
+import 'package:accounting_kantor_gl_useraccess/module/setup/product_tabungan/product_tabungan_page.dart';
 import 'package:accounting_kantor_gl_useraccess/module/setup/sandi/sandi_page.dart';
+import 'package:accounting_kantor_gl_useraccess/module/setup/format_print/format_print_pages.dart';
+import 'package:accounting_kantor_gl_useraccess/module/setup/sandi_transaksi_buku/sandi_transaksi_buku_page.dart';
+import 'package:accounting_kantor_gl_useraccess/module/setup/lending/lending_setup_pages.dart';
 import 'package:accounting_kantor_gl_useraccess/utils/auto_logout_wrapper.dart';
 import 'package:accounting_kantor_gl_useraccess/utils/colors.dart';
 import 'package:accounting_kantor_gl_useraccess/utils/images_path.dart';
@@ -29,6 +34,26 @@ class MenuPage extends StatelessWidget {
         return const AoPage();
       case 6:
         return const SandiPage();
+      case 7:
+        return const ProductTabunganPage();
+      case 8:
+        return const ProductDepositoPage();
+      case 9:
+        return const FormatBukuPage();
+      case 10:
+        return const FormatCoverPage();
+      case 11:
+        return const FormatBilyetPage();
+      case 12:
+        return const SandiTransaksiBukuPage();
+      case 13:
+        return const AgunanPage();
+      case 14:
+        return const RakPage();
+      case 15:
+        return const RateRakPage();
+      case 16:
+        return const PpapPage();
       default:
         if (value.menuItems.isEmpty) return const _NoAccessPage();
         return _buildPageByFirst(value.menuItems.first.page);
@@ -49,6 +74,26 @@ class MenuPage extends StatelessWidget {
         return const AoPage();
       case 6:
         return const SandiPage();
+      case 7:
+        return const ProductTabunganPage();
+      case 8:
+        return const ProductDepositoPage();
+      case 9:
+        return const FormatBukuPage();
+      case 10:
+        return const FormatCoverPage();
+      case 11:
+        return const FormatBilyetPage();
+      case 12:
+        return const SandiTransaksiBukuPage();
+      case 13:
+        return const AgunanPage();
+      case 14:
+        return const RakPage();
+      case 15:
+        return const RateRakPage();
+      case 16:
+        return const PpapPage();
       default:
         return const _NoAccessPage();
     }
@@ -99,7 +144,7 @@ class MenuPage extends StatelessWidget {
                                     ),
                                     SizedBox(height: 2),
                                     Text(
-                                      'Kantor, GL, AO, Sandi & User Access',
+                                      'Setup & Master CMS Core',
                                       style: TextStyle(fontSize: 12, color: Colors.white70),
                                     ),
                                   ],

@@ -533,6 +533,10 @@ class NetworkURL {
     return "$url/core/master_menu";
   }
 
+  static String setupKodeTransaksiTabungan() {
+    return "$url/core/setup_kode_transaksi_tabungan";
+  }
+
   static String coreUsersList() {
     return "$url/users/list";
   }
@@ -608,6 +612,148 @@ class NetworkURL {
 
   static String sandiGroupList() {
     return "$url/setup/sandi/group/list";
+  }
+
+
+  static String formatBukuList() {
+    return "$url/setup/format-buku/list";
+  }
+
+  static String formatBukuDetail() {
+    return "$url/setup/format-buku/detail";
+  }
+
+  static String formatBukuCreate() {
+    return "$url/setup/format-buku/create";
+  }
+
+  static String formatBukuUpdate() {
+    return "$url/setup/format-buku/update";
+  }
+
+  static String formatBukuDelete() {
+    return "$url/setup/format-buku/delete";
+  }
+
+  static String formatCoverList() {
+    return "$url/setup/format-cover/list";
+  }
+
+  static String formatCoverDetail() {
+    return "$url/setup/format-cover/detail";
+  }
+
+  static String formatCoverCreate() {
+    return "$url/setup/format-cover/create";
+  }
+
+  static String formatCoverUpdate() {
+    return "$url/setup/format-cover/update";
+  }
+
+  static String formatCoverDelete() {
+    return "$url/setup/format-cover/delete";
+  }
+
+  static String formatBilyetList() {
+    return "$url/setup/format-bilyet/list";
+  }
+
+  static String formatBilyetDetail() {
+    return "$url/setup/format-bilyet/detail";
+  }
+
+  static String formatBilyetCreate() {
+    return "$url/setup/format-bilyet/create";
+  }
+
+  static String formatBilyetUpdate() {
+    return "$url/setup/format-bilyet/update";
+  }
+
+  static String formatBilyetDelete() {
+    return "$url/setup/format-bilyet/delete";
+  }
+
+  static String sandiTransaksiBukuList() {
+    return "$url/setup/sandi-transaksi-buku/list";
+  }
+
+  static String sandiTransaksiBukuDetail() {
+    return "$url/setup/sandi-transaksi-buku/detail";
+  }
+
+  static String sandiTransaksiBukuCreate() {
+    return "$url/setup/sandi-transaksi-buku/create";
+  }
+
+  static String sandiTransaksiBukuUpdate() {
+    return "$url/setup/sandi-transaksi-buku/update";
+  }
+
+  static String sandiTransaksiBukuDelete() {
+    return "$url/setup/sandi-transaksi-buku/delete";
+  }
+
+
+  static String agunanList() {
+    return "$url/setup/agunan/list";
+  }
+
+  static String agunanDetail() {
+    return "$url/setup/agunan/detail";
+  }
+
+  static String agunanCreate() {
+    return "$url/setup/agunan/create";
+  }
+
+  static String agunanUpdate() {
+    return "$url/setup/agunan/update";
+  }
+
+  static String agunanDelete() {
+    return "$url/setup/agunan/delete";
+  }
+
+  static String bobotPpapList() {
+    return "$url/setup/bobot-ppap/list";
+  }
+
+  static String bobotPpapDetail() {
+    return "$url/setup/bobot-ppap/detail";
+  }
+
+  static String bobotPpapCreate() {
+    return "$url/setup/bobot-ppap/create";
+  }
+
+  static String bobotPpapUpdate() {
+    return "$url/setup/bobot-ppap/update";
+  }
+
+  static String bobotPpapDelete() {
+    return "$url/setup/bobot-ppap/delete";
+  }
+
+  static String rakSetupOffice() {
+    return "$url/setup/rak/setup-office";
+  }
+
+  static String rakRelasiCreate() {
+    return "$url/setup/rak/relasi-create";
+  }
+
+  static String rakRelasiList() {
+    return "$url/setup/rak/relasi-list";
+  }
+
+  static String rakRelasiUpdate() {
+    return "$url/setup/rak/relasi-update";
+  }
+
+  static String rakRelasiDelete() {
+    return "$url/setup/rak/relasi-delete";
   }
 
   static String cariKaryawan() {

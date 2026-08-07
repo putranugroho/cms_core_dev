@@ -16,6 +16,8 @@ class CoreMenuItem {
   final String routePath;
   final int page;
   final String icon;
+  final String section;
+  final String? parentTitle;
   final CoreAccessModel? access;
 
   const CoreMenuItem({
@@ -23,6 +25,8 @@ class CoreMenuItem {
     required this.routePath,
     required this.page,
     required this.icon,
+    required this.section,
+    this.parentTitle,
     this.access,
   });
 }
@@ -40,6 +44,16 @@ class MenuNotifier extends ChangeNotifier {
   static const String routeUserAccess = '/admin/user-access';
   static const String routeAo = '/master/ao';
   static const String routeSandi = '/setup/sandi';
+  static const String routeProductTabungan = '/setup/product-tabungan';
+  static const String routeProductDeposito = '/setup/product-deposito';
+  static const String routeFormatBuku = '/setup/format-buku';
+  static const String routeFormatCover = '/setup/format-cover';
+  static const String routeFormatBilyet = '/setup/format-bilyet';
+  static const String routeSandiTransaksiBuku = '/setup/sandi-transaksi-buku';
+  static const String routeAgunan = '/setup/agunan';
+  static const String routeRak = '/setup/rak';
+  static const String routeRateRak = '/setup/rak/relasi';
+  static const String routePpap = '/setup/bobot-ppap';
 
   UserModel? users;
   List<CoreAccessModel> fasilitas = [];
@@ -77,12 +91,22 @@ class MenuNotifier extends ChangeNotifier {
 
   void _buildMenuItems() {
     final all = <CoreMenuItem>[
-      CoreMenuItem(title: 'Kantor', routePath: routeKantor, page: 1, icon: 'building'),
-      CoreMenuItem(title: 'GL / COA', routePath: routeGl, page: 2, icon: 'accounting'),
-      CoreMenuItem(title: 'Login User', routePath: routeUsers, page: 3, icon: 'group'),
-      CoreMenuItem(title: 'User Access', routePath: routeUserAccess, page: 4, icon: 'user'),
-      CoreMenuItem(title: 'Account Officer', routePath: routeAo, page: 5, icon: 'ao'),
-      CoreMenuItem(title: 'Sandi BI/OJK', routePath: routeSandi, page: 6, icon: 'sandi'),
+      const CoreMenuItem(title: 'Kantor link ke HRIS', routePath: routeKantor, page: 1, icon: 'building', section: 'SETUP'),
+      const CoreMenuItem(title: 'Sandi BI', routePath: routeSandi, page: 6, icon: 'sandi', section: 'SETUP'),
+      const CoreMenuItem(title: 'GL', routePath: routeGl, page: 2, icon: 'accounting', section: 'SETUP'),
+      const CoreMenuItem(title: 'Prod Tabungan', routePath: routeProductTabungan, page: 7, icon: 'saving', section: 'SETUP'),
+      const CoreMenuItem(title: 'Prod Deposito', routePath: routeProductDeposito, page: 8, icon: 'deposito', section: 'SETUP'),
+      const CoreMenuItem(title: 'Format Buku Tab', routePath: routeFormatBuku, page: 9, icon: 'print', section: 'SETUP'),
+      const CoreMenuItem(title: 'Format Cover Buku', routePath: routeFormatCover, page: 10, icon: 'print', section: 'SETUP'),
+      const CoreMenuItem(title: 'Format Bilyet Dep', routePath: routeFormatBilyet, page: 11, icon: 'print', section: 'SETUP'),
+      const CoreMenuItem(title: 'Sandi Trans Buku', routePath: routeSandiTransaksiBuku, page: 12, icon: 'sandi', section: 'SETUP'),
+      const CoreMenuItem(title: 'Agunan', routePath: routeAgunan, page: 13, icon: 'collateral', section: 'SETUP'),
+      const CoreMenuItem(title: 'RAK', routePath: routeRak, page: 14, icon: 'rak', section: 'SETUP'),
+      const CoreMenuItem(title: 'Rate RAK', routePath: routeRateRak, page: 15, icon: 'rak', section: 'SETUP'),
+      const CoreMenuItem(title: 'PPAP', routePath: routePpap, page: 16, icon: 'ppap', section: 'SETUP'),
+      const CoreMenuItem(title: 'Login User', routePath: routeUsers, page: 3, icon: 'group', section: 'MASTER', parentTitle: 'User Login & Akses'),
+      const CoreMenuItem(title: 'User Access', routePath: routeUserAccess, page: 4, icon: 'user', section: 'MASTER', parentTitle: 'User Login & Akses'),
+      const CoreMenuItem(title: 'AO / Kolektor', routePath: routeAo, page: 5, icon: 'ao', section: 'MASTER'),
     ];
 
     if (isSuperAdmin) {
