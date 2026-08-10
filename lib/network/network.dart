@@ -4,7 +4,7 @@ const xpassword = "corevalue@20231234";
 
 const dev = false;
 
-const url = dev ? "http://103.129.149.131:8098" : "http://103.129.149.131:8098";
+const url = dev ? "https://api-core.medtrans.id" : "https://api-core.medtrans.id";
 
 const url2 = "https://core.metimes.id";
 

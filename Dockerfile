@@ -2,12 +2,11 @@ FROM ghcr.io/cirruslabs/flutter:stable AS build
 
 WORKDIR /app
 
-COPY pubspec.* ./
-RUN flutter pub get
-
 COPY . .
 
 RUN flutter config --enable-web
+RUN flutter create . --platforms web
+RUN flutter pub get
 RUN flutter build web --release
 
 FROM nginx:alpine
