@@ -13,8 +13,6 @@ class Setuprepository {
     final headers = <String, dynamic>{
       'Accept': 'application/json',
       'Content-Type': 'application/json',
-      // Header lama tetap dipertahankan agar endpoint lama tidak berubah perilaku.
-      'api-key': '123',
     };
 
     if (sessionToken.isNotEmpty) {
