@@ -38,6 +38,41 @@ class CoreCoaModel {
     return int.tryParse(value.toString());
   }
 
+  static String tipeText(int? value) {
+    switch (value) {
+      case 1:
+        return 'Aktiva';
+      case 2:
+        return 'Pasiva';
+      case 3:
+        return 'Pendapatan';
+      case 4:
+        return 'Biaya';
+      case 5:
+        return 'Pos Adm Debet';
+      case 6:
+        return 'Pos Adm Kredit';
+      default:
+        return '-';
+    }
+  }
+
+  static String levelText(int? value) {
+    switch (value) {
+      case 1:
+        return 'Header';
+      case 2:
+        return 'Buku Besar';
+      case 3:
+        return 'Sub Buku Besar';
+      default:
+        return '-';
+    }
+  }
+
+  String get tipeCoaText => tipeText(tipeCoa);
+  String get levelCoaText => levelText(levelCoa);
+
   factory CoreCoaModel.fromJson(Map<String, dynamic> json) => CoreCoaModel(
         id: _s(json['id']),
         kodeCoa: _s(json['kode_coa']),

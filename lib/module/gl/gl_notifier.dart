@@ -37,6 +37,9 @@ class GlNotifier extends ChangeNotifier {
   int? levelCoa = 1;
   String postingType = 'I';
 
+  static const tipeOptions = <int>[1, 2, 3, 4, 5, 6];
+  static const levelOptions = <int>[1, 2, 3];
+
   Future<void> _init() async {
     users = await Pref().getUsers();
     await getCoa();
@@ -58,6 +61,41 @@ class GlNotifier extends ChangeNotifier {
         'kode_kantor_login': _kodeKantorLogin,
       };
 
+  Map<String, CoreCoaModel> get coaByKode => {
+        for (final item in list) item.kodeCoa: item,
+      };
+
+  List<CoreCoaModel> get headerOptions => list
+      .where((e) => e.levelCoa == 1 && (tipeCoa == null || e.tipeCoa == tipeCoa))
+      .toList()
+    ..sort((a, b) => a.kodeCoa.compareTo(b.kodeCoa));
+
+  List<CoreCoaModel> get bukuBesarOptions => list
+      .where((e) => e.levelCoa == 2 && (tipeCoa == null || e.tipeCoa == tipeCoa))
+      .toList()
+    ..sort((a, b) => a.kodeCoa.compareTo(b.kodeCoa));
+
+  List<CoreCoaModel> get parentOptions {
+    if (levelCoa == 2) return headerOptions;
+    if (levelCoa == 3) return bukuBesarOptions;
+    return [];
+  }
+
+  String? get parentDropdownValue {
+    final code = parentCoa.text.trim();
+    if (code.isEmpty) return null;
+    if (parentOptions.any((e) => e.kodeCoa == code)) return code;
+    return null;
+  }
+
+  bool get parentRequired => levelCoa == 2 || levelCoa == 3;
+
+  String get parentLabel {
+    if (levelCoa == 2) return 'Header Induk';
+    if (levelCoa == 3) return 'Buku Besar Induk';
+    return 'Parent COA';
+  }
+
   Future<void> getCoa() async {
     isLoading = true;
     errorMessage = null;
@@ -75,7 +113,7 @@ class GlNotifier extends ChangeNotifier {
       'ojk_code': '',
       'status_data': '',
       'page': 1,
-      'limit': 100,
+      'limit': 1000,
     };
 
     final value = await Setuprepository.setup(
@@ -85,14 +123,14 @@ class GlNotifier extends ChangeNotifier {
     );
 
     final status = value?['status']?.toString().toLowerCase() ?? '';
-    if (status.contains('success') || status.contains('sukses')) {
+    if (status.contains('success') || status.contains('sukses') || value?['code'] == '000') {
       final raw = value['data'];
       final rawList = raw is Map ? (raw['data'] ?? []) : raw;
-      list = (rawList as List? ?? [])
+      final rows = (rawList as List? ?? [])
           .whereType<Map>()
           .map((e) => CoreCoaModel.fromJson(Map<String, dynamic>.from(e)))
           .toList();
-      list.sort((a, b) => a.kodeCoa.compareTo(b.kodeCoa));
+      list = _sortHierarchical(rows);
     } else {
       list = [];
       errorMessage = value?['message']?.toString() ?? 'Gagal memuat data COA';
@@ -101,6 +139,54 @@ class GlNotifier extends ChangeNotifier {
     isLoading = false;
     notifyListeners();
   }
+
+  List<CoreCoaModel> _sortHierarchical(List<CoreCoaModel> rows) {
+    final byKode = {for (final row in rows) row.kodeCoa: row};
+
+    String path(CoreCoaModel row) {
+      final tipe = (row.tipeCoa ?? 0).toString().padLeft(2, '0');
+      if (row.levelCoa == 1) return '$tipe/${row.kodeCoa}';
+      if (row.levelCoa == 2) return '$tipe/${row.parentCoa}/${row.kodeCoa}';
+      if (row.levelCoa == 3) {
+        final parent = byKode[row.parentCoa];
+        final headerCode = parent?.parentCoa ?? row.parentCoa;
+        return '$tipe/$headerCode/${row.parentCoa}/${row.kodeCoa}';
+      }
+      return '$tipe/${row.kodeCoa}';
+    }
+
+    rows.sort((a, b) {
+      final byPath = path(a).compareTo(path(b));
+      if (byPath != 0) return byPath;
+      return a.kodeCoa.compareTo(b.kodeCoa);
+    });
+    return rows;
+  }
+
+  String headerName(CoreCoaModel row) {
+    if (row.levelCoa == 1) return row.namaCoa;
+    final parent = coaByKode[row.parentCoa];
+    if (row.levelCoa == 2) return parent?.namaCoa ?? '';
+    if (row.levelCoa == 3) {
+      final header = parent == null ? null : coaByKode[parent.parentCoa];
+      return header?.namaCoa ?? '';
+    }
+    return '';
+  }
+
+  String bukuBesarName(CoreCoaModel row) {
+    if (row.levelCoa == 2) return row.namaCoa;
+    if (row.levelCoa == 3) return coaByKode[row.parentCoa]?.namaCoa ?? '';
+    return '';
+  }
+
+  String subBukuBesarName(CoreCoaModel row) {
+    if (row.levelCoa == 3) return row.namaCoa;
+    return '';
+  }
+
+  String levelText(int? value) => CoreCoaModel.levelText(value);
+  String tipeText(int? value) => CoreCoaModel.tipeText(value);
 
   void tambah() {
     clear();
@@ -126,13 +212,31 @@ class GlNotifier extends ChangeNotifier {
     postingType = 'I';
   }
 
+  void _clearParentIfInvalid() {
+    if (!parentRequired) {
+      parentCoa.clear();
+      return;
+    }
+    final code = parentCoa.text.trim();
+    if (code.isNotEmpty && !parentOptions.any((e) => e.kodeCoa == code)) {
+      parentCoa.clear();
+    }
+  }
+
   void pilihTipeCoa(int? value) {
     tipeCoa = value;
+    _clearParentIfInvalid();
     notifyListeners();
   }
 
   void pilihLevelCoa(int? value) {
     levelCoa = value;
+    parentCoa.clear();
+    notifyListeners();
+  }
+
+  void pilihParentCoa(String? value) {
+    parentCoa.text = value ?? '';
     notifyListeners();
   }
 
@@ -164,12 +268,17 @@ class GlNotifier extends ChangeNotifier {
         'nama_coa': namaCoa.text.trim(),
         'tipe_coa': tipeCoa,
         'level_coa': levelCoa,
-        'parent_coa': parentCoa.text.trim(),
+        'parent_coa': parentRequired ? parentCoa.text.trim() : '',
         'posting_type': postingType,
       };
 
   Future<void> cek() async {
     if (!(keyForm.currentState?.validate() ?? false)) return;
+
+    if (parentRequired && parentCoa.text.trim().isEmpty) {
+      informationDialog(context, 'Validasi', '$parentLabel wajib dipilih.');
+      return;
+    }
 
     DialogCustom().showLoading(context);
     final url = editData ? NetworkURL.editMasterGl() : NetworkURL.addMasterGl();
@@ -178,7 +287,7 @@ class GlNotifier extends ChangeNotifier {
       url,
       jsonEncode(_coaPayload()),
     );
-    Navigator.pop(context);
+    if (context.mounted) Navigator.pop(context);
 
     final status = value?['status']?.toString().toLowerCase() ?? '';
     if (status.contains('success') || value?['code'] == '000') {
@@ -223,7 +332,7 @@ class GlNotifier extends ChangeNotifier {
         'kode_coa': selected!.kodeCoa,
       }),
     );
-    Navigator.pop(context);
+    if (context.mounted) Navigator.pop(context);
 
     final status = value?['status']?.toString().toLowerCase() ?? '';
     if (status.contains('success') || value?['code'] == '000') {
@@ -234,5 +343,16 @@ class GlNotifier extends ChangeNotifier {
     } else {
       informationDialog(context, 'Warning', value?['message']?.toString() ?? 'Gagal menghapus data');
     }
+  }
+
+  @override
+  void dispose() {
+    keyword.dispose();
+    kodeCoa.dispose();
+    namaCoa.dispose();
+    parentCoa.dispose();
+    specialType.dispose();
+    ojkCode.dispose();
+    super.dispose();
   }
 }

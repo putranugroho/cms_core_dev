@@ -36,7 +36,7 @@ class AoRepository {
   static Future<List<KantorModel>> listKantor({
     String keyword = '',
     String statusAktif = '',
-    String statusData = '',
+    String statusData = 'A',
     int page = 1,
     int limit = 500,
   }) async {
@@ -64,6 +64,7 @@ class AoRepository {
     return _extractRows(value)
         .whereType<Map>()
         .map((e) => KantorModel.fromJson(Map<String, dynamic>.from(e)))
+        .where((e) => e.statusData.trim().isEmpty || e.statusData.trim().toUpperCase() == 'A')
         .toList();
   }
 

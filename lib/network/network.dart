@@ -4,7 +4,7 @@ const xpassword = "corevalue@20231234";
 
 const dev = false;
 
-const url = dev ? "https://api-core.medtrans.id" : "https://api-core.medtrans.id";
+const url = dev ? "http://103.129.149.131:8098" : "http://103.129.149.131:8098";
 
 const url2 = "https://core.metimes.id";
 
@@ -695,6 +695,27 @@ class NetworkURL {
     return "$url/setup/sandi-transaksi-buku/delete";
   }
 
+
+
+  static String savingProductList() {
+    return "$url/setup/saving-product/list";
+  }
+
+  static String savingProductDetail() {
+    return "$url/setup/saving-product/detail";
+  }
+
+  static String savingProductCreate() {
+    return "$url/setup/saving-product/create";
+  }
+
+  static String savingProductUpdate() {
+    return "$url/setup/saving-product/update";
+  }
+
+  static String savingProductDelete() {
+    return "$url/setup/saving-product/delete";
+  }
 
   static String agunanList() {
     return "$url/setup/agunan/list";

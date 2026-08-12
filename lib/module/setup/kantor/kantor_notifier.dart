@@ -77,7 +77,7 @@ class KantorNotifier extends ChangeNotifier {
       'bprid': '',
       'status_kantor': null,
       'status_aktif': '',
-      'status_data': '',
+      'status_data': 'A',
       'page': 1,
       'limit': 100,
     };
@@ -95,6 +95,7 @@ class KantorNotifier extends ChangeNotifier {
       list = (rawList as List? ?? [])
           .whereType<Map>()
           .map((e) => KantorModel.fromJson(Map<String, dynamic>.from(e)))
+          .where((e) => e.statusData.trim().isEmpty || e.statusData.trim().toUpperCase() == 'A')
           .toList();
       list.sort((a, b) => a.kodeKantor.compareTo(b.kodeKantor));
     } else {

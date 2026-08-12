@@ -100,28 +100,32 @@ class _CoaTable extends StatelessWidget {
             headingRowColor: MaterialStateProperty.all(colorPrimary),
             headingTextStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             columns: const [
-              DataColumn(label: Text('Kode COA')),
-              DataColumn(label: Text('Nama COA')),
-              DataColumn(label: Text('Tipe')),
+              DataColumn(label: Text('Gol. Akun')),
+              DataColumn(label: Text('No. COA')),
+              DataColumn(label: Text('Header')),
+              DataColumn(label: Text('Buku Besar')),
+              DataColumn(label: Text('Sub Buku Besar')),
               DataColumn(label: Text('Level')),
               DataColumn(label: Text('Parent')),
               DataColumn(label: Text('Posting')),
-              DataColumn(label: Text('Special')),
-              DataColumn(label: Text('OJK')),
               DataColumn(label: Text('Status')),
               DataColumn(label: Text('Aksi')),
             ],
             rows: value.list.map((CoreCoaModel data) {
+              final indent = (((data.levelCoa ?? 1) - 1).clamp(0, 2) as num).toDouble() * 18.0;
               return DataRow(
                 cells: [
-                  DataCell(Text(data.kodeCoa)),
-                  DataCell(SizedBox(width: 240, child: Text(data.namaCoa, overflow: TextOverflow.ellipsis))),
-                  DataCell(Text(data.tipeCoa?.toString() ?? '')),
-                  DataCell(Text(data.levelCoa?.toString() ?? '')),
+                  DataCell(Text(data.tipeCoaText)),
+                  DataCell(Padding(
+                    padding: EdgeInsets.only(left: indent),
+                    child: Text(data.kodeCoa, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  )),
+                  DataCell(SizedBox(width: 180, child: Text(value.headerName(data), overflow: TextOverflow.ellipsis))),
+                  DataCell(SizedBox(width: 220, child: Text(value.bukuBesarName(data), overflow: TextOverflow.ellipsis))),
+                  DataCell(SizedBox(width: 240, child: Text(value.subBukuBesarName(data), overflow: TextOverflow.ellipsis))),
+                  DataCell(Text(data.levelCoaText)),
                   DataCell(Text(data.parentCoa)),
                   DataCell(Text(data.postingType)),
-                  DataCell(Text(data.specialType)),
-                  DataCell(Text(data.ojkCode)),
                   DataCell(Text(data.statusData)),
                   DataCell(
                     ElevatedButton(
@@ -152,7 +156,7 @@ class _CoaForm extends StatelessWidget {
         color: Colors.black.withOpacity(0.25),
         alignment: Alignment.centerRight,
         child: Container(
-          width: 560,
+          width: 620,
           height: double.infinity,
           color: Colors.white,
           child: Form(
@@ -178,31 +182,24 @@ class _CoaForm extends StatelessWidget {
                   _textField('Nama COA', value.namaCoa, required: true),
                   DropdownButtonFormField<int>(
                     value: value.tipeCoa,
-                    decoration: _decoration('Tipe COA'),
-                    items: const [
-                      DropdownMenuItem(value: 1, child: Text('1')),
-                      DropdownMenuItem(value: 2, child: Text('2')),
-                      DropdownMenuItem(value: 3, child: Text('3')),
-                      DropdownMenuItem(value: 4, child: Text('4')),
-                      DropdownMenuItem(value: 5, child: Text('5')),
-                    ],
+                    decoration: _decoration('Golongan Akun / Tipe COA'),
+                    items: GlNotifier.tipeOptions
+                        .map((e) => DropdownMenuItem(value: e, child: Text('$e - ${value.tipeText(e)}')))
+                        .toList(),
                     onChanged: value.pilihTipeCoa,
                   ),
                   const SizedBox(height: 14),
                   DropdownButtonFormField<int>(
                     value: value.levelCoa,
-                    decoration: _decoration('Level COA'),
-                    items: const [
-                      DropdownMenuItem(value: 1, child: Text('1')),
-                      DropdownMenuItem(value: 2, child: Text('2')),
-                      DropdownMenuItem(value: 3, child: Text('3')),
-                      DropdownMenuItem(value: 4, child: Text('4')),
-                      DropdownMenuItem(value: 5, child: Text('5')),
-                    ],
+                    decoration: _decoration('Jenis / Level COA'),
+                    items: GlNotifier.levelOptions
+                        .map((e) => DropdownMenuItem(value: e, child: Text('$e - ${value.levelText(e)}')))
+                        .toList(),
                     onChanged: value.pilihLevelCoa,
                   ),
                   const SizedBox(height: 14),
-                  _textField('Parent COA', value.parentCoa),
+                  if (value.parentRequired) _parentDropdown() else _noParentInfo(),
+                  const SizedBox(height: 14),
                   DropdownButtonFormField<String>(
                     value: value.postingType,
                     decoration: _decoration('Posting Type'),
@@ -214,7 +211,6 @@ class _CoaForm extends StatelessWidget {
                     ],
                     onChanged: value.pilihPostingType,
                   ),
-                  const SizedBox(height: 14),
                   const SizedBox(height: 20),
                   ButtonPrimary(onTap: value.cek, name: 'Simpan'),
                   if (value.editData) ...[
@@ -227,6 +223,39 @@ class _CoaForm extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _parentDropdown() {
+    return DropdownButtonFormField<String>(
+      value: value.parentDropdownValue,
+      decoration: _decoration(value.parentLabel),
+      isExpanded: true,
+      items: value.parentOptions
+          .map((e) => DropdownMenuItem(
+                value: e.kodeCoa,
+                child: Text('${e.kodeCoa} - ${e.namaCoa}', overflow: TextOverflow.ellipsis),
+              ))
+          .toList(),
+      onChanged: value.parentOptions.isEmpty ? null : value.pilihParentCoa,
+      validator: (_) {
+        if (!value.parentRequired) return null;
+        if (value.parentOptions.isEmpty) return 'Data ${value.parentLabel.toLowerCase()} belum tersedia';
+        if (value.parentCoa.text.trim().isEmpty) return '${value.parentLabel} wajib dipilih';
+        return null;
+      },
+    );
+  }
+
+  Widget _noParentInfo() {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Text('Level Header tidak membutuhkan parent COA.'),
     );
   }
 

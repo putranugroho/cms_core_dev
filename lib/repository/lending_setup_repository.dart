@@ -43,12 +43,12 @@ class LendingSetupRepository {
       'bprid': '',
       'status_kantor': null,
       'status_aktif': '',
-      'status_data': '',
+      'status_data': 'A',
       'page': page,
       'limit': limit,
     });
     if (!isSuccess(value)) throw Exception(message(value, 'Gagal memuat kantor'));
-    return rows(value).whereType<Map>().map((e) => KantorModel.fromJson(Map<String, dynamic>.from(e))).toList();
+    return rows(value).whereType<Map>().map((e) => KantorModel.fromJson(Map<String, dynamic>.from(e))).where((e) => e.statusData.trim().isEmpty || e.statusData.trim().toUpperCase() == 'A').toList();
   }
 
   static Future<List<AgunanSetupModel>> listAgunan({String keyword = '', String statusData = 'A', int page = 1, int limit = 100}) async {
