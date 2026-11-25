@@ -11,6 +11,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
+/// Kategori bawaan: form detailnya sudah ada di CSR, jadi hanya ditampilkan
+/// dan tidak bisa diubah atau dihapus. Kode sama dengan kelompok_agunan backend.
+const Map<String, String> kategoriBawaan = {
+  'KENDARAAN': 'Kendaraan',
+  'TANAH': 'Tanah',
+  'TANAH_BANGUNAN': 'Tanah & Bangunan',
+  'DEPOSITO': 'Deposito',
+};
+
 /// Setup kategori agunan custom: definisi field untuk form Agunan di CSR.
 /// Data di /setup/request-kategori, kode berawalan AGN-.
 class KategoriAgunanPage extends StatelessWidget {
@@ -281,7 +290,7 @@ class _Header extends StatelessWidget {
               children: [
                 Text('Kategori Agunan', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 SizedBox(height: 4),
-                Text('Field tambahan untuk agunan kategori custom', style: TextStyle(color: Colors.black54)),
+                Text('4 kategori bawaan (terkunci) dan kategori custom', style: TextStyle(color: Colors.black54)),
               ],
             ),
           ),
@@ -321,7 +330,9 @@ class _Tabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (value.list.isEmpty) return const Center(child: Text('Belum ada kategori agunan.'));
+    final cari = value.keyword.text.trim().toLowerCase();
+    final bawaan = kategoriBawaan.entries.where((e) => cari.isEmpty || e.value.toLowerCase().contains(cari) || e.key.toLowerCase().contains(cari)).toList();
+    if (bawaan.isEmpty && value.list.isEmpty) return const Center(child: Text('Kategori agunan tidak ditemukan.'));
     return Scrollbar(
       thumbVisibility: true,
       child: SingleChildScrollView(
@@ -338,32 +349,49 @@ class _Tabel extends StatelessWidget {
               DataColumn(label: Text('Dibuat')),
               DataColumn(label: Text('Aksi')),
             ],
-            rows: value.list
-                .map((row) => DataRow(cells: [
-                      DataCell(Text(row.kode, style: const TextStyle(fontWeight: FontWeight.bold))),
-                      DataCell(SizedBox(width: 280, child: Text(row.nama, overflow: TextOverflow.ellipsis))),
-                      DataCell(Text('${row.jumlahField}')),
-                      DataCell(Text(row.createdAt)),
-                      DataCell(Row(
+            rows: [
+              ...bawaan.map((e) => DataRow(
+                    color: MaterialStateProperty.all(const Color(0xFFF3F5F4)),
+                    cells: [
+                      DataCell(Text(e.key, style: const TextStyle(fontWeight: FontWeight.bold))),
+                      DataCell(SizedBox(width: 280, child: Text(e.value, overflow: TextOverflow.ellipsis))),
+                      const DataCell(Text('-')),
+                      const DataCell(Text('-')),
+                      const DataCell(Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          if (value.canUpdate)
-                            ElevatedButton(
-                              onPressed: () => value.edit(row),
-                              style: ElevatedButton.styleFrom(backgroundColor: colorPrimary),
-                              child: const Text('Edit', style: TextStyle(color: Colors.white)),
-                            ),
-                          if (value.canUpdate && value.canDelete) const SizedBox(width: 8),
-                          if (value.canDelete)
-                            ElevatedButton(
-                              onPressed: () => value.confirmDelete(row),
-                              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                              child: const Text('Hapus', style: TextStyle(color: Colors.white)),
-                            ),
+                          Icon(Icons.lock_outline, size: 16, color: Colors.black54),
+                          SizedBox(width: 6),
+                          Text('Bawaan', style: TextStyle(color: Colors.black54)),
                         ],
                       )),
-                    ]))
-                .toList(),
+                    ],
+                  )),
+              ...value.list.map((row) => DataRow(cells: [
+                    DataCell(Text(row.kode, style: const TextStyle(fontWeight: FontWeight.bold))),
+                    DataCell(SizedBox(width: 280, child: Text(row.nama, overflow: TextOverflow.ellipsis))),
+                    DataCell(Text('${row.jumlahField}')),
+                    DataCell(Text(row.createdAt)),
+                    DataCell(Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (value.canUpdate)
+                          ElevatedButton(
+                            onPressed: () => value.edit(row),
+                            style: ElevatedButton.styleFrom(backgroundColor: colorPrimary),
+                            child: const Text('Edit', style: TextStyle(color: Colors.white)),
+                          ),
+                        if (value.canUpdate && value.canDelete) const SizedBox(width: 8),
+                        if (value.canDelete)
+                          ElevatedButton(
+                            onPressed: () => value.confirmDelete(row),
+                            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                            child: const Text('Hapus', style: TextStyle(color: Colors.white)),
+                          ),
+                      ],
+                    )),
+                  ])),
+            ],
           ),
         ),
       ),
