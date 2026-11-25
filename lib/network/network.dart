@@ -737,6 +737,27 @@ class NetworkURL {
     return "$url/setup/agunan/delete";
   }
 
+  // Kategori agunan custom: disimpan di /setup/request-kategori (field dinamis field_1..N).
+  static String requestKategoriList() {
+    return "$url/setup/request-kategori/list";
+  }
+
+  static String requestKategoriDetail() {
+    return "$url/setup/request-kategori/detail";
+  }
+
+  static String requestKategoriCreate() {
+    return "$url/setup/request-kategori/create";
+  }
+
+  static String requestKategoriUpdate() {
+    return "$url/setup/request-kategori/update";
+  }
+
+  static String requestKategoriDelete() {
+    return "$url/setup/request-kategori/delete";
+  }
+
   static String bobotPpapList() {
     return "$url/setup/bobot-ppap/list";
   }

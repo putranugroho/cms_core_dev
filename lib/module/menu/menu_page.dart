@@ -11,6 +11,7 @@ import 'package:accounting_kantor_gl_useraccess/module/setup/sandi/sandi_page.da
 import 'package:accounting_kantor_gl_useraccess/module/setup/format_print/format_print_pages.dart';
 import 'package:accounting_kantor_gl_useraccess/module/setup/sandi_transaksi_buku/sandi_transaksi_buku_page.dart';
 import 'package:accounting_kantor_gl_useraccess/module/setup/lending/lending_setup_pages.dart';
+import 'package:accounting_kantor_gl_useraccess/module/setup/kategori_agunan/kategori_agunan_page.dart';
 import 'package:accounting_kantor_gl_useraccess/utils/auto_logout_wrapper.dart';
 import 'package:accounting_kantor_gl_useraccess/utils/colors.dart';
 import 'package:accounting_kantor_gl_useraccess/utils/images_path.dart';
@@ -54,6 +55,8 @@ class MenuPage extends StatelessWidget {
         return const RateRakPage();
       case 16:
         return const PpapPage();
+      case 17:
+        return const KategoriAgunanPage();
       default:
         if (value.menuItems.isEmpty) return const _NoAccessPage();
         return _buildPageByFirst(value.menuItems.first.page);
@@ -94,6 +97,8 @@ class MenuPage extends StatelessWidget {
         return const RateRakPage();
       case 16:
         return const PpapPage();
+      case 17:
+        return const KategoriAgunanPage();
       default:
         return const _NoAccessPage();
     }

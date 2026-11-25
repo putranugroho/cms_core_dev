@@ -51,6 +51,7 @@ class MenuNotifier extends ChangeNotifier {
   static const String routeFormatBilyet = '/setup/format-bilyet';
   static const String routeSandiTransaksiBuku = '/setup/sandi-transaksi-buku';
   static const String routeAgunan = '/setup/agunan';
+  static const String routeKategoriAgunan = '/setup/request-kategori';
   static const String routeRak = '/setup/rak';
   static const String routeRateRak = '/setup/rak/relasi';
   static const String routePpap = '/setup/bobot-ppap';
@@ -101,6 +102,7 @@ class MenuNotifier extends ChangeNotifier {
       const CoreMenuItem(title: 'Format Bilyet Dep', routePath: routeFormatBilyet, page: 11, icon: 'print', section: 'SETUP'),
       const CoreMenuItem(title: 'Sandi Trans Buku', routePath: routeSandiTransaksiBuku, page: 12, icon: 'sandi', section: 'SETUP'),
       const CoreMenuItem(title: 'Agunan', routePath: routeAgunan, page: 13, icon: 'collateral', section: 'SETUP'),
+      const CoreMenuItem(title: 'Kategori Agunan', routePath: routeKategoriAgunan, page: 17, icon: 'collateral', section: 'SETUP'),
       const CoreMenuItem(title: 'RAK', routePath: routeRak, page: 14, icon: 'rak', section: 'SETUP'),
       const CoreMenuItem(title: 'Rate RAK', routePath: routeRateRak, page: 15, icon: 'rak', section: 'SETUP'),
       const CoreMenuItem(title: 'PPAP', routePath: routePpap, page: 16, icon: 'ppap', section: 'SETUP'),
