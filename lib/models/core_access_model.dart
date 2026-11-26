@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class CoreAccessModel {
   final int? id;
   final int? menuId;
@@ -34,15 +36,18 @@ class CoreAccessModel {
   });
 
   factory CoreAccessModel.fromJson(Map<String, dynamic> json) {
+    final routePath = (json['route_path'] ?? '').toString();
+    final menuName = _normalizeMenuName((json['menu'] ?? '').toString(), routePath);
+    final submenuName = _normalizeMenuName((json['submenu'] ?? '').toString(), routePath);
     return CoreAccessModel(
       id: _toIntNullable(json['id']),
       menuId: _toIntNullable(json['menu_id']),
       userid: (json['userid'] ?? '').toString(),
       modul: (json['modul'] ?? '').toString(),
-      menu: (json['menu'] ?? '').toString(),
-      submenu: (json['submenu'] ?? '').toString(),
+      menu: menuName,
+      submenu: submenuName,
       subsubmenu: (json['subsubmenu'] ?? '').toString(),
-      routePath: (json['route_path'] ?? '').toString(),
+      routePath: routePath,
       canView: _toBool(json['can_view'] ?? json['flag'], defaultValue: true),
       canCreate: _toBool(json['can_create']),
       canUpdate: _toBool(json['can_update']),
@@ -90,9 +95,42 @@ class CoreAccessModel {
     );
   }
 
+  // id on a user-access row belongs to that row; menu_id identifies the master.
+  int? get masterMenuId {
+    final reference = menuId;
+    if (reference != null && reference > 0) return reference;
+    final sourceId = id;
+    return userid.trim().isEmpty && sourceId != null && sourceId > 0 ? sourceId : null;
+  }
+
+  String get hierarchyKey => jsonEncode([
+        modul.trim().toLowerCase(),
+        menu.trim().toLowerCase(),
+        submenu.trim().toLowerCase(),
+        subsubmenu.trim().toLowerCase(),
+      ]);
+
+  String get accessKey {
+    final sourceId = masterMenuId;
+    if (sourceId != null) return 'menu:${modul.trim().toLowerCase()}:$sourceId';
+    if (menu.trim().isNotEmpty || submenu.trim().isNotEmpty) return 'hierarchy:$hierarchyKey';
+    if (routePath.trim().isNotEmpty) return 'route:${routePath.trim().toLowerCase()}';
+    return 'hierarchy:$hierarchyKey';
+  }
+
+  bool representsSameMenu(CoreAccessModel other) {
+    final sourceId = masterMenuId;
+    final otherId = other.masterMenuId;
+    if (sourceId != null && otherId != null) {
+      return sourceId == otherId && modul.trim().toLowerCase() == other.modul.trim().toLowerCase();
+    }
+    if (menu.trim().isNotEmpty && other.menu.trim().isNotEmpty) return hierarchyKey == other.hierarchyKey;
+    return routePath.trim().isNotEmpty && other.routePath.trim().isNotEmpty && matchesRoute(other.routePath);
+  }
+
   Map<String, dynamic> toJson() => {
-        'id': menuId ?? id,
-        'menu_id': menuId ?? id,
+        'id': masterMenuId,
+        'menu_id': masterMenuId,
         'userid': userid,
         'modul': modul,
         'menu': menu,
@@ -108,7 +146,16 @@ class CoreAccessModel {
         'flag': flag,
       };
 
-  bool matchesRoute(String route) => routePath.trim().toLowerCase() == route.trim().toLowerCase();
+  bool matchesRoute(String route) => routePath.trim().isNotEmpty && routePath.trim().toLowerCase() == route.trim().toLowerCase();
+
+
+  static String _normalizeMenuName(String value, String routePath) {
+    final trimmed = value.trim();
+    final isAoRoute = routePath.trim().toLowerCase() == '/master/ao';
+    final isOldAoName = trimmed.toLowerCase() == 'ao / kolektor' || trimmed.toLowerCase() == 'ao/kolektor';
+    if (isAoRoute || isOldAoName) return 'Account Officer';
+    return value;
+  }
 
   static bool _toBool(dynamic value, {bool defaultValue = false}) {
     if (value == null) return defaultValue;

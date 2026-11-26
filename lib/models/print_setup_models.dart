@@ -242,6 +242,7 @@ class FormatBilyetModel {
       'nama_ao',
       'logo',
       'tanda_tangan',
+      'qr_code',
     ];
     final positions = <String, double>{};
     for (final key in keys) {

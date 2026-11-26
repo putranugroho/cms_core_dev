@@ -4,7 +4,7 @@ const xpassword = "corevalue@20231234";
 
 const dev = false;
 
-const url = dev ? "http://103.129.149.131:8098" : "http://103.129.149.131:8098";
+const url = dev ? "https://api-core.medtrans.id" : "https://api-core.medtrans.id";
 
 const url2 = "https://core.metimes.id";
 
@@ -19,6 +19,14 @@ class NetworkURL {
 
   static String getKantor() {
     return "$url/setup/office/list";
+  }
+
+  static String hrisInquiryKantor() {
+    return "$url/hris/kantor";
+  }
+
+  static String hrisInquiryEmployee() {
+    return "$url/hris/employee";
   }
 
   static String addKantor() {
@@ -569,7 +577,6 @@ class NetworkURL {
     return "$url/users/unlock";
   }
 
-
   static String aoList() {
     return "$url/master/ao/list";
   }
@@ -613,7 +620,6 @@ class NetworkURL {
   static String sandiGroupList() {
     return "$url/setup/sandi/group/list";
   }
-
 
   static String formatBukuList() {
     return "$url/setup/format-buku/list";
@@ -695,8 +701,6 @@ class NetworkURL {
     return "$url/setup/sandi-transaksi-buku/delete";
   }
 
-
-
   static String savingProductList() {
     return "$url/setup/saving-product/list";
   }
@@ -757,8 +761,32 @@ class NetworkURL {
     return "$url/setup/bobot-ppap/delete";
   }
 
+  static String pajakAgregatUpsert() {
+    return "$url/setup/pajak-agregat/upsert";
+  }
+
+  static String pajakAgregatList() {
+    return "$url/setup/pajak-agregat/list";
+  }
+
+  static String pajakAgregatDetail() {
+    return "$url/setup/pajak-agregat/detail";
+  }
+
   static String rakSetupOffice() {
     return "$url/setup/rak/setup-office";
+  }
+
+  static String rakOfficeDetail() {
+    return "$url/setup/rak/office-detail";
+  }
+
+  static String rakSetupRate() {
+    return "$url/setup/rak/setup-rate";
+  }
+
+  static String rakRateDetail() {
+    return "$url/setup/rak/rate-detail";
   }
 
   static String rakRelasiCreate() {
@@ -780,6 +808,9 @@ class NetworkURL {
   static String cariKaryawan() {
     return "$url/karyawan/search";
   }
+
+  static String rabMarketing(String action) => "$url/master/rab-marketing/$action";
+  static String rabKantor(String action) => "$url/master/rab-kantor/$action";
 
   static String cariUsers() {
     return "$url/users/search";
@@ -816,4 +847,115 @@ class NetworkURL {
   static String getKelurahan(String id) {
     return "$url2/kelurahan?id=$id";
   }
+
+
+  static String setupLoanList() {
+    return "$url/setup/loan/list";
+  }
+
+  static String setupLoanDetail() {
+    return "$url/setup/loan/detail";
+  }
+
+  static String setupLoanCreate() {
+    return "$url/setup/loan/create";
+  }
+
+  static String setupLoanUpdate() {
+    return "$url/setup/loan/update";
+  }
+
+  static String setupLoanDelete() {
+    return "$url/setup/loan/delete";
+  }
+
+
+  static String setupInventarisList() {
+    return "$url/setup/inventaris/list";
+  }
+
+  static String setupInventarisDetail() {
+    return "$url/setup/inventaris/detail";
+  }
+
+  static String setupInventarisCreate() {
+    return "$url/setup/inventaris/create";
+  }
+
+  static String setupInventarisUpdate() {
+    return "$url/setup/inventaris/update";
+  }
+
+  static String setupInventarisDelete() {
+    return "$url/setup/inventaris/delete";
+  }
+
+  static String masterAbaList() {
+    return "$url/master/aba/list";
+  }
+
+  static String masterAbaDetail() {
+    return "$url/master/aba/detail";
+  }
+
+  static String masterAbaCreate() {
+    return "$url/master/aba/create";
+  }
+
+  static String masterAbaUpdate() {
+    return "$url/master/aba/update";
+  }
+
+  static String masterAbaDelete() {
+    return "$url/master/aba/delete";
+  }
+
+  static String thirdPartyCapabilities() => "$url/core/third-party/capabilities";
+  static String partyGroupEndpoint(String action) => "$url/setup/kelompok-pihak-ketiga/$action";
+  static String thirdPartyEndpoint(String action) => "$url/setup/data-pihak-ketiga/$action";
+
+  static String masterInventarisList() {
+    return "$url/master/inventaris/list";
+  }
+
+  static String masterInventarisDetail() {
+    return "$url/master/inventaris/detail";
+  }
+
+  static String masterInventarisCreate() {
+    return "$url/master/inventaris/create";
+  }
+
+  static String masterInventarisUpdate() {
+    return "$url/master/inventaris/update";
+  }
+
+  static String masterInventarisDelete() {
+    return "$url/master/inventaris/delete";
+  }
+
+  static String masterMitraBisnisSearch() {
+    return "$url/master/mitra-bisnis/search";
+  }
+
+  static String masterMitraBisnisDetail() {
+    return "$url/master/mitra-bisnis/detail";
+  }
+
+  static String masterMitraBisnisCreate() {
+    return "$url/master/mitra-bisnis/create";
+  }
+
+  static String masterMitraBisnisUpdate() {
+    return "$url/master/mitra-bisnis/update";
+  }
+
+  static String masterMitraBisnisDelete() {
+    return "$url/master/mitra-bisnis/delete";
+  }
+
+  static String bprProfile() {
+    return "https://api-dev-cms.medtrans.id/bpr_profile";
+  }
+
 }

@@ -1,7 +1,7 @@
-import 'package:accounting_kantor_gl_useraccess/models/index.dart';
-import 'package:accounting_kantor_gl_useraccess/module/setup/sandi/sandi_notifier.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/button_custom.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/colors.dart';
+import 'package:cms_core/models/index.dart';
+import 'package:cms_core/module/setup/sandi/sandi_notifier.dart';
+import 'package:cms_core/utils/button_custom.dart';
+import 'package:cms_core/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

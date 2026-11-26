@@ -1,7 +1,7 @@
-import 'package:accounting_kantor_gl_useraccess/models/index.dart';
-import 'package:accounting_kantor_gl_useraccess/module/master/ao/ao_notifier.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/button_custom.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/colors.dart';
+import 'package:cms_core/models/index.dart';
+import 'package:cms_core/module/master/ao/ao_notifier.dart';
+import 'package:cms_core/utils/button_custom.dart';
+import 'package:cms_core/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -36,17 +36,17 @@ class AoPage extends StatelessWidget {
                               children: [
                                 Text('Account Officer', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                                 SizedBox(height: 4),
-                                Text('Master data Marketing & Collector', style: TextStyle(color: Colors.black54)),
+                                Text('Master data Account Officer', style: TextStyle(color: Colors.black54)),
                               ],
                             ),
                           ),
                           SizedBox(
-                            width: 260,
+                            width: 280,
                             child: TextField(
                               controller: value.keyword,
                               onSubmitted: (_) => value.getAo(),
                               decoration: InputDecoration(
-                                hintText: 'Cari kode / nama / no HP',
+                                hintText: 'Cari kode / employee / nama / no HP',
                                 prefixIcon: const Icon(Icons.search),
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                               ),
@@ -136,10 +136,11 @@ class _AoTable extends StatelessWidget {
             headingTextStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             columns: const [
               DataColumn(label: Text('Kode AO')),
-              DataColumn(label: Text('Nama AO')),
+              DataColumn(label: Text('Nama')),
+              DataColumn(label: Text('Employee No')),
+              DataColumn(label: Text('Kode Kantor')),
               DataColumn(label: Text('No HP')),
               DataColumn(label: Text('Role')),
-              DataColumn(label: Text('Kode Kantor')),
               DataColumn(label: Text('Status')),
               DataColumn(label: Text('Created By')),
               DataColumn(label: Text('Created At')),
@@ -150,9 +151,10 @@ class _AoTable extends StatelessWidget {
                 cells: [
                   DataCell(Text(data.kodeAo)),
                   DataCell(SizedBox(width: 240, child: Text(data.namaAo, overflow: TextOverflow.ellipsis))),
+                  DataCell(Text(data.nomorEmployee)),
+                  DataCell(Text(data.kodeKantor)),
                   DataCell(Text(data.noHp)),
                   DataCell(Text(data.roleAoTxt)),
-                  DataCell(Text(data.kodeKantor)),
                   DataCell(_StatusChip(text: data.statusText, code: data.statusData)),
                   DataCell(Text(data.createdBy)),
                   DataCell(Text(data.createdAt)),
@@ -198,7 +200,7 @@ class _AoForm extends StatelessWidget {
         color: Colors.black.withOpacity(0.25),
         alignment: Alignment.centerRight,
         child: Container(
-          width: 540,
+          width: 620,
           height: double.infinity,
           color: Colors.white,
           child: Form(
@@ -220,6 +222,13 @@ class _AoForm extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 20),
+                  if (!value.editData) ...[
+                    _employeeInquirySection(value),
+                    const SizedBox(height: 16),
+                  ],
+                  _textField('Nama', value.namaAo, required: true, readOnly: true, maxLength: 200),
+                  _textField('Employee No', value.nomorEmployee, required: true, readOnly: true, maxLength: 50),
+                  _kodeKantorField(value),
                   _textField(
                     'Kode AO',
                     value.kodeAo,
@@ -227,14 +236,6 @@ class _AoForm extends StatelessWidget {
                     readOnly: value.editData,
                     maxLength: 20,
                     inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9\-_]'))],
-                  ),
-                  _textField('Nama AO', value.namaAo, required: true, maxLength: 200),
-                  _textField(
-                    'No HP',
-                    value.noHp,
-                    required: true,
-                    maxLength: 20,
-                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9+]'))],
                   ),
                   DropdownButtonFormField<int>(
                     value: value.roleAo,
@@ -247,7 +248,13 @@ class _AoForm extends StatelessWidget {
                     onChanged: value.pilihRole,
                   ),
                   const SizedBox(height: 14),
-                  _kantorDropdown(value),
+                  _textField(
+                    'No HP',
+                    value.noHp,
+                    required: true,
+                    maxLength: 20,
+                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9+]'))],
+                  ),
                   const SizedBox(height: 20),
                   ButtonPrimary(onTap: value.cek, name: value.editData ? 'Update' : 'Simpan'),
                   if (value.editData && value.canDelete) ...[
@@ -263,75 +270,118 @@ class _AoForm extends StatelessWidget {
     );
   }
 
-
-  Widget _kantorDropdown(AoNotifier value) {
-    if (value.isLoadingKantor) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 14),
-        child: TextFormField(
-          readOnly: true,
-          decoration: _decoration('Kantor AO').copyWith(
-            suffixIcon: const Padding(
-              padding: EdgeInsets.all(12),
-              child: SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            ),
+  Widget _employeeInquirySection(AoNotifier value) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text('Inquiry Employee HRIS', style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 6),
+          const Text(
+            'AO baru diambil dari employee HRIS. Cari berdasarkan nama, employee no, atau no HP, lalu pilih employee untuk auto-fill Nama, Employee No, Kode Kantor, dan No HP.',
+            style: TextStyle(fontSize: 12, color: Colors.black54),
           ),
-        ),
-      );
-    }
-
-    if (value.listKantor.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 14),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.red.shade200),
-            borderRadius: BorderRadius.circular(8),
-            color: Colors.red.shade50,
-          ),
-          child: Row(
+          const SizedBox(height: 12),
+          Row(
             children: [
-              const Expanded(
-                child: Text(
-                  'Data kantor tidak tersedia. Muat ulang dari endpoint list kantor.',
-                  style: TextStyle(color: Colors.red),
+              Expanded(
+                child: TextField(
+                  controller: value.employeeSearch,
+                  decoration: _decoration('Cari employee HRIS').copyWith(prefixIcon: const Icon(Icons.search)),
+                  onSubmitted: (_) => value.searchEmployee(),
                 ),
               ),
-              TextButton(
-                onPressed: value.getKantorList,
-                child: const Text('Muat Ulang'),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: value.loadingEmployee ? null : value.searchEmployee,
+                style: ElevatedButton.styleFrom(backgroundColor: colorPrimary, minimumSize: const Size(90, 50)),
+                child: value.loadingEmployee
+                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Text('Cari', style: TextStyle(color: Colors.white)),
               ),
             ],
           ),
-        ),
-      );
-    }
+          if (value.employeeError != null) ...[
+            const SizedBox(height: 8),
+            Text(value.employeeError!, style: const TextStyle(color: Colors.red, fontSize: 12)),
+          ],
+          if (value.employeeResults.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              constraints: const BoxConstraints(maxHeight: 210),
+              decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(8)),
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: value.employeeResults.length,
+                separatorBuilder: (_, __) => const Divider(height: 1),
+                itemBuilder: (_, index) {
+                  final employee = value.employeeResults[index];
+                  final selected = value.selectedEmployee?.id == employee.id && employee.id.isNotEmpty;
+                  return ListTile(
+                    dense: true,
+                    selected: selected,
+                    selectedTileColor: colorPrimary.withOpacity(0.08),
+                    leading: Icon(selected ? Icons.check_circle : Icons.person_outline, color: selected ? colorPrimary : null),
+                    title: Text(employee.title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                    subtitle: Text('Kantor: ${employee.officeText} • Status: ${employee.employeeStatus.isEmpty ? '-' : employee.employeeStatus}'),
+                    onTap: () => value.pilihEmployee(employee),
+                  );
+                },
+              ),
+            ),
+          ],
+          if (value.selectedEmployee != null) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.green.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.green),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.verified_user, color: Colors.green),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Employee dipilih: ${value.selectedEmployee!.title}\nKantor: ${value.selectedEmployee!.officeText}',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _kodeKantorField(AoNotifier value) {
+    final helper = value.selectedEmployee != null
+        ? 'Otomatis dari response inquiry employee HRIS: ${value.selectedEmployee!.officeText}'
+        : 'Otomatis dari employee HRIS. Untuk edit data lama, nilai mengikuti data AO existing.';
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
-      child: DropdownButtonFormField<KantorModel>(
-        value: value.kantorModel,
-        isExpanded: true,
-        decoration: _decoration('Kantor AO'),
-        items: value.listKantor
-            .map(
-              (e) => DropdownMenuItem<KantorModel>(
-                value: e,
-                child: Text(
-                  '(${e.kodeKantor}) ${e.namaKantor.isNotEmpty ? e.namaKantor : e.kodeKantor}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            )
-            .toList(),
-        onChanged: value.pilihKantor,
-        validator: (v) => v == null ? 'Pilih kantor AO' : null,
+      child: TextFormField(
+        controller: value.kodeKantor,
+        readOnly: true,
+        decoration: _decoration('Kode Kantor').copyWith(
+          helperText: helper,
+          filled: true,
+          fillColor: const Color(0xFFF1F5F9),
+          errorText: value.kantorError,
+        ),
+        validator: (v) => (v ?? '').trim().isEmpty ? 'Kode kantor wajib terisi dari HRIS' : null,
       ),
     );
   }
@@ -353,14 +403,17 @@ class _AoForm extends StatelessWidget {
         maxLines: maxLines,
         maxLength: maxLength,
         inputFormatters: inputFormatters,
-        textCapitalization: label == 'Nama AO' ? TextCapitalization.characters : TextCapitalization.none,
+        textCapitalization: label == 'Nama' ? TextCapitalization.characters : TextCapitalization.none,
+        decoration: _decoration(label).copyWith(
+          filled: readOnly,
+          fillColor: readOnly ? const Color(0xFFF1F5F9) : null,
+        ),
         validator: (v) {
           final text = (v ?? '').trim();
           if (required && text.isEmpty) return 'Wajib diisi';
           if (maxLength != null && text.length > maxLength) return 'Maksimal $maxLength karakter';
           return null;
         },
-        decoration: _decoration(label),
       ),
     );
   }

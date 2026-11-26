@@ -1,7 +1,7 @@
-import 'package:accounting_kantor_gl_useraccess/models/index.dart';
-import 'package:accounting_kantor_gl_useraccess/module/setup/coa/coa_notifier.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/button_custom.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/format_currency.dart';
+import 'package:cms_core/models/index.dart';
+import 'package:cms_core/module/setup/coa/coa_notifier.dart';
+import 'package:cms_core/utils/button_custom.dart';
+import 'package:cms_core/utils/format_currency.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -1751,14 +1751,14 @@ class CoaPage extends StatelessWidget {
                                                           ),
                                                           Radio(
                                                             activeColor: colorPrimary,
-                                                            value: "Y",
+                                                            value: "I",
                                                             groupValue: value.typePosting,
-                                                            onChanged: (e) => value.gantiPosting("Y"),
+                                                            onChanged: (e) => value.gantiPosting("I"),
                                                           ),
                                                           const SizedBox(
                                                             width: 8,
                                                           ),
-                                                          const Text("Yes"),
+                                                          const Text("Interaktif"),
                                                           const SizedBox(
                                                             width: 32,
                                                           ),
@@ -1771,7 +1771,7 @@ class CoaPage extends StatelessWidget {
                                                           const SizedBox(
                                                             width: 8,
                                                           ),
-                                                          const Text("No"),
+                                                          const Text("Non-Interaktif"),
                                                         ],
                                                       ),
                                                       const SizedBox(height: 16),
@@ -2033,7 +2033,7 @@ class DetailDataSource extends DataGridSource {
         DataGridCell(columnName: 'header', value: currentHeader),
         DataGridCell(columnName: 'bukubesar', value: currentBukuBesar ?? ''),
         DataGridCell(columnName: 'subbukubesar', value: currentSubBukuBesar ?? ''),
-        DataGridCell(columnName: 'posting', value: posting),
+        DataGridCell(columnName: 'posting', value: posting == 'I' || posting == 'Y' ? 'Interaktif' : 'Non-Interaktif'),
         DataGridCell(columnName: 'hutang', value: hutang),
         DataGridCell(columnName: 'piutang', value: piutang),
         DataGridCell(columnName: 'perantara', value: akunPerantara),

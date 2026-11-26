@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:accounting_kantor_gl_useraccess/models/index.dart';
-import 'package:accounting_kantor_gl_useraccess/module/auth/login_page.dart';
-import 'package:accounting_kantor_gl_useraccess/network/network.dart';
-import 'package:accounting_kantor_gl_useraccess/pref/pref.dart';
-import 'package:accounting_kantor_gl_useraccess/repository/SetupRepository.dart';
+import 'package:cms_core/models/index.dart';
+import 'package:cms_core/module/auth/login_page.dart';
+import 'package:cms_core/network/network.dart';
+import 'package:cms_core/pref/pref.dart';
+import 'package:cms_core/repository/SetupRepository.dart';
 import 'package:flutter/material.dart';
 
 import '../../utils/button_custom.dart';
@@ -35,6 +35,7 @@ class MenuNotifier extends ChangeNotifier {
   final BuildContext context;
 
   MenuNotifier({required this.context}) {
+    Setuprepository.sessionFailure.addListener(_onSessionFailure);
     getProfile();
   }
 
@@ -46,6 +47,7 @@ class MenuNotifier extends ChangeNotifier {
   static const String routeSandi = '/setup/sandi';
   static const String routeProductTabungan = '/setup/product-tabungan';
   static const String routeProductDeposito = '/setup/product-deposito';
+  static const String routeProductKredit = '/setup/product-kredit';
   static const String routeFormatBuku = '/setup/format-buku';
   static const String routeFormatCover = '/setup/format-cover';
   static const String routeFormatBilyet = '/setup/format-bilyet';
@@ -54,6 +56,21 @@ class MenuNotifier extends ChangeNotifier {
   static const String routeRak = '/setup/rak';
   static const String routeRateRak = '/setup/rak/relasi';
   static const String routePpap = '/setup/bobot-ppap';
+  static const String routePajakAgregat = '/setup/pajak-agregat';
+  static const String routeSetupInventaris = '/setup/inventaris';
+  static const String routeAba = '/master/aba';
+  static const String routeMitraBisnis = '/master/mitra-bisnis';
+  static const String routeInventaris = '/master/inventaris';
+  static const String routePenempatanInventaris = '/master/inventaris/penempatan';
+  static const String routeKelompokAset = '/setup/kelompok-aset';
+  static const String routeRevaluasiInventaris = '/master/inventaris/revaluasi';
+  static const String routePenghapusanInventaris = '/master/inventaris/penghapusan';
+  static const String routeRabMarketingRealisasi = '/master/rab-marketing/realisasi';
+  static const String routeRabKantorRealisasi = '/master/rab-kantor/realisasi';
+  static const String routeRabMarketing = '/master/rab-marketing';
+  static const String routeRabKantor = '/master/rab-kantor';
+  static const String routeKelompokPihakKetiga = '/setup/kelompok-pihak-ketiga';
+  static const String routeDataPihakKetiga = '/setup/data-pihak-ketiga';
 
   UserModel? users;
   List<CoreAccessModel> fasilitas = [];
@@ -83,6 +100,7 @@ class MenuNotifier extends ChangeNotifier {
     _buildMenuItems();
 
     await heartbeat(force: true, silent: true);
+    if (_isAutoLoggingOut) return;
     _startPeriodicHeartbeat();
 
     isLoading = false;
@@ -91,22 +109,40 @@ class MenuNotifier extends ChangeNotifier {
 
   void _buildMenuItems() {
     final all = <CoreMenuItem>[
+      const CoreMenuItem(title: 'Prod Tabungan', routePath: routeProductTabungan, page: 7, icon: 'saving', section: 'SETUP'),
+      const CoreMenuItem(title: 'Format Cover Buku', routePath: routeFormatCover, page: 10, icon: 'print', section: 'SETUP'),
+      const CoreMenuItem(title: 'Format Buku Tab', routePath: routeFormatBuku, page: 9, icon: 'print', section: 'SETUP'),
+      const CoreMenuItem(title: 'Sandi Trans Buku', routePath: routeSandiTransaksiBuku, page: 12, icon: 'sandi', section: 'SETUP'),
+      const CoreMenuItem(title: 'Prod Deposito', routePath: routeProductDeposito, page: 8, icon: 'deposito', section: 'SETUP'),
+      const CoreMenuItem(title: 'Format Bilyet Dep', routePath: routeFormatBilyet, page: 11, icon: 'print', section: 'SETUP'),
+      const CoreMenuItem(title: 'Prod Kredit', routePath: routeProductKredit, page: 18, icon: 'loan', section: 'SETUP'),
+      const CoreMenuItem(title: 'Agunan', routePath: routeAgunan, page: 13, icon: 'collateral', section: 'SETUP'),
+      const CoreMenuItem(title: 'Jam Operasional', routePath: '/setup/jam-operasional', page: 33, icon: 'clock', section: 'SETUP'),
+      const CoreMenuItem(title: 'Hari Libur', routePath: '/setup/hari-libur', page: 34, icon: 'calendar-x', section: 'SETUP'),
+      const CoreMenuItem(title: 'Jenis Inventaris', routePath: routeSetupInventaris, page: 19, icon: 'inventory', section: 'SETUP'),
       const CoreMenuItem(title: 'Kantor link ke HRIS', routePath: routeKantor, page: 1, icon: 'building', section: 'SETUP'),
       const CoreMenuItem(title: 'Sandi BI', routePath: routeSandi, page: 6, icon: 'sandi', section: 'SETUP'),
       const CoreMenuItem(title: 'GL', routePath: routeGl, page: 2, icon: 'accounting', section: 'SETUP'),
-      const CoreMenuItem(title: 'Prod Tabungan', routePath: routeProductTabungan, page: 7, icon: 'saving', section: 'SETUP'),
-      const CoreMenuItem(title: 'Prod Deposito', routePath: routeProductDeposito, page: 8, icon: 'deposito', section: 'SETUP'),
-      const CoreMenuItem(title: 'Format Buku Tab', routePath: routeFormatBuku, page: 9, icon: 'print', section: 'SETUP'),
-      const CoreMenuItem(title: 'Format Cover Buku', routePath: routeFormatCover, page: 10, icon: 'print', section: 'SETUP'),
-      const CoreMenuItem(title: 'Format Bilyet Dep', routePath: routeFormatBilyet, page: 11, icon: 'print', section: 'SETUP'),
-      const CoreMenuItem(title: 'Sandi Trans Buku', routePath: routeSandiTransaksiBuku, page: 12, icon: 'sandi', section: 'SETUP'),
-      const CoreMenuItem(title: 'Agunan', routePath: routeAgunan, page: 13, icon: 'collateral', section: 'SETUP'),
-      const CoreMenuItem(title: 'RAK', routePath: routeRak, page: 14, icon: 'rak', section: 'SETUP'),
-      const CoreMenuItem(title: 'Rate RAK', routePath: routeRateRak, page: 15, icon: 'rak', section: 'SETUP'),
+      const CoreMenuItem(title: 'SBB RAK', routePath: routeRak, page: 14, icon: 'rak', section: 'SETUP', parentTitle: 'RAK'),
+      const CoreMenuItem(title: 'Rate RAK', routePath: routeRateRak, page: 15, icon: 'rak', section: 'SETUP', parentTitle: 'RAK'),
       const CoreMenuItem(title: 'PPAP', routePath: routePpap, page: 16, icon: 'ppap', section: 'SETUP'),
+      const CoreMenuItem(title: 'Pajak Agregat', routePath: routePajakAgregat, page: 17, icon: 'tax', section: 'SETUP'),
+      const CoreMenuItem(title: 'Kelompok Pihak Ketiga', routePath: routeKelompokPihakKetiga, page: 25, icon: 'group', section: 'SETUP'),
       const CoreMenuItem(title: 'Login User', routePath: routeUsers, page: 3, icon: 'group', section: 'MASTER', parentTitle: 'User Login & Akses'),
-      const CoreMenuItem(title: 'User Access', routePath: routeUserAccess, page: 4, icon: 'user', section: 'MASTER', parentTitle: 'User Login & Akses'),
-      const CoreMenuItem(title: 'AO / Kolektor', routePath: routeAo, page: 5, icon: 'ao', section: 'MASTER'),
+      const CoreMenuItem(
+          title: 'User Access', routePath: routeUserAccess, page: 4, icon: 'user', section: 'MASTER', parentTitle: 'User Login & Akses'),
+      const CoreMenuItem(title: 'Account Officer', routePath: routeAo, page: 5, icon: 'ao', section: 'MASTER'),
+      const CoreMenuItem(title: 'ABA', routePath: routeAba, page: 20, icon: 'bank', section: 'MASTER'),
+      const CoreMenuItem(title: 'Mitra Bisnis', routePath: routeMitraBisnis, page: 21, icon: 'group', section: 'MASTER'),
+      const CoreMenuItem(title: 'Data Inventaris', routePath: routeInventaris, page: 22, icon: 'inventory', section: 'MASTER', parentTitle: 'Inventaris'),
+      const CoreMenuItem(title: 'Penempatan Inventaris', routePath: routePenempatanInventaris, page: 30, icon: 'inventory', section: 'MASTER', parentTitle: 'Inventaris'),
+      const CoreMenuItem(title: 'Revaluasi', routePath: routeRevaluasiInventaris, page: 28, icon: 'inventory', section: 'MASTER', parentTitle: 'Inventaris'),
+      const CoreMenuItem(title: 'Penghapusan Inventaris', routePath: routePenghapusanInventaris, page: 29, icon: 'inventory', section: 'MASTER', parentTitle: 'Inventaris'),
+      const CoreMenuItem(title: 'Kelompok Aset', routePath: routeKelompokAset, page: 27, icon: 'inventory', section: 'SETUP'),
+      const CoreMenuItem(title: 'Target', routePath: routeRabMarketing, page: 23, icon: 'group', section: 'MASTER', parentTitle: 'RAB Marketing'),
+      const CoreMenuItem(title: 'Realisasi', routePath: routeRabMarketingRealisasi, page: 31, icon: 'group', section: 'MASTER', parentTitle: 'RAB Marketing'),
+      const CoreMenuItem(title: 'Target', routePath: routeRabKantor, page: 24, icon: 'building', section: 'MASTER', parentTitle: 'RAB Kantor'),
+      const CoreMenuItem(title: 'Realisasi', routePath: routeRabKantorRealisasi, page: 32, icon: 'building', section: 'MASTER', parentTitle: 'RAB Kantor'),
     ];
 
     if (isSuperAdmin) {
@@ -170,6 +206,17 @@ class MenuNotifier extends ChangeNotifier {
     _heartbeatTimer = Timer.periodic(const Duration(minutes: 5), (_) => heartbeat(silent: true));
   }
 
+  void _onSessionFailure() {
+    final message = Setuprepository.sessionFailure.value;
+    if (message != null) unawaited(_handleSessionFailure(message));
+  }
+
+  Future<void> _handleSessionFailure(String message) async {
+    if (_isAutoLoggingOut) return;
+    _isAutoLoggingOut = true;
+    await _logoutLocal(showMessage: true, message: message);
+  }
+
   Future<void> heartbeat({bool force = false, bool silent = false}) async {
     final sessionToken = await Pref().getSessionToken();
     if (sessionToken.isEmpty) return;
@@ -189,14 +236,17 @@ class MenuNotifier extends ChangeNotifier {
       final data = value['data'];
       if (data is Map) {
         await Pref().updateCoreSession(Map<String, dynamic>.from(data));
+        users = await Pref().getUsers();
         cmsCoreEnabled = PrefValue.boolFromDynamic(data['cms_core_enabled'], defaultValue: cmsCoreEnabled);
         idleTimeoutMinutes = PrefValue.intFromDynamic(data['idle_timeout_minutes'], idleTimeoutMinutes);
         fasilitas = await Pref().getCoreAccessList();
         _buildMenuItems();
         if (!silent) notifyListeners();
       }
-    } else {
-      await _logoutLocal(showMessage: !silent, message: value?['message']?.toString() ?? 'Session berakhir');
+    } else if (Setuprepository.isSessionFailure(value)) {
+      await _handleSessionFailure(value?['message']?.toString() ?? 'Session berakhir');
+    } else if (!silent && context.mounted) {
+      informationDialog(context, 'Informasi', value?['message']?.toString() ?? 'Gagal memeriksa session. Silakan coba kembali.');
     }
   }
 
@@ -328,6 +378,7 @@ class MenuNotifier extends ChangeNotifier {
 
   @override
   void dispose() {
+    Setuprepository.sessionFailure.removeListener(_onSessionFailure);
     _heartbeatTimer?.cancel();
     super.dispose();
   }

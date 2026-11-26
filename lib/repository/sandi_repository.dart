@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:accounting_kantor_gl_useraccess/models/index.dart';
-import 'package:accounting_kantor_gl_useraccess/network/network.dart';
-import 'package:accounting_kantor_gl_useraccess/repository/SetupRepository.dart';
+import 'package:cms_core/models/index.dart';
+import 'package:cms_core/network/network.dart';
+import 'package:cms_core/repository/SetupRepository.dart';
 
 class SandiRepository {
   static bool isSuccess(dynamic value) {
@@ -78,10 +78,7 @@ class SandiRepository {
       throw Exception(message(value, 'Gagal memuat data sandi'));
     }
 
-    return _extractRows(value)
-        .whereType<Map>()
-        .map((e) => SandiModel.fromJson(Map<String, dynamic>.from(e)))
-        .toList();
+    return _extractRows(value).whereType<Map>().map((e) => SandiModel.fromJson(Map<String, dynamic>.from(e))).toList();
   }
 
   static Future<SandiModel> detail({required String group, required String kode}) async {

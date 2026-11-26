@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:accounting_kantor_gl_useraccess/models/index.dart';
+import 'package:cms_core/models/index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Pref {
@@ -126,6 +126,15 @@ class Pref {
 
   Future<void> updateCoreSession(Map<String, dynamic> data) async {
     final pref = await SharedPreferences.getInstance();
+    if (data.containsKey('userid') || data.containsKey('users_id')) {
+      await pref.setString(Pref.userid, (data['userid'] ?? data['users_id'] ?? '').toString());
+    }
+    if (data.containsKey('kode_kantor') || data.containsKey('kdkantor')) {
+      await pref.setString(Pref.kodeKantor, (data['kode_kantor'] ?? data['kdkantor'] ?? '').toString());
+    }
+    if (data.containsKey('bpr_id') || data.containsKey('bprid')) {
+      await pref.setString(Pref.kodePt, (data['bpr_id'] ?? data['bprid'] ?? '').toString());
+    }
     if (data.containsKey('cms_core_enabled')) {
       await pref.setBool(Pref.cmsCoreEnabled, _toBool(data['cms_core_enabled'], defaultValue: true));
     }
@@ -259,11 +268,7 @@ class Pref {
     try {
       final decoded = jsonDecode(raw);
       if (decoded is List) {
-        return decoded
-            .whereType<Map>()
-            .map((e) => CoreAccessModel.fromJson(Map<String, dynamic>.from(e)))
-            .where((e) => e.canView)
-            .toList();
+        return decoded.whereType<Map>().map((e) => CoreAccessModel.fromJson(Map<String, dynamic>.from(e))).where((e) => e.canView).toList();
       }
     } catch (_) {}
     return [];

@@ -1,6 +1,7 @@
-import 'package:accounting_kantor_gl_useraccess/models/index.dart';
-import 'package:accounting_kantor_gl_useraccess/pref/pref.dart';
-import 'package:accounting_kantor_gl_useraccess/repository/SetupRepository.dart';
+import 'package:cms_core/models/index.dart';
+import 'package:cms_core/pref/pref.dart';
+import 'package:cms_core/repository/SetupRepository.dart';
+import 'package:cms_core/repository/hris_repository.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 
@@ -99,32 +100,15 @@ class NeracaBerjalanNotiifer extends ChangeNotifier {
     listKantor.clear();
     notifyListeners();
 
-    final body = {
-      "kode_pt": users!.kodePt,
-    };
+    listKantor.addAll(await HrisRepository.listKantor(bprId: users!.kodePt));
+    if (listKantor.isNotEmpty) {
+      kantorModel = listKantor.where((e) => e.kodeKantor == users!.kodeKantor).isNotEmpty
+          ? listKantor.where((e) => e.kodeKantor == users!.kodeKantor).first
+          : listKantor.first;
 
-    final response = await Setuprepository.getKantor(
-      token,
-      NetworkURL.getKantor(),
-      jsonEncode(body),
-    );
-
-    final status = response['status']?.toString().toLowerCase() ?? '';
-
-    if (status == "success" || status == "sukses") {
-      for (Map<String, dynamic> item in response['data']) {
-        listKantor.add(KantorModel.fromJson(item));
-      }
-
-      if (listKantor.isNotEmpty) {
-        kantorModel = listKantor.where((e) => e.kodeKantor == users!.kodeKantor).isNotEmpty
-            ? listKantor.where((e) => e.kodeKantor == users!.kodeKantor).first
-            : listKantor.first;
-
-        indukModel = listKantor.where((e) => e.kodeKantor == users!.kodeInduk).isNotEmpty
-            ? listKantor.where((e) => e.kodeKantor == users!.kodeInduk).first
-            : kantorModel;
-      }
+      indukModel = listKantor.where((e) => e.kodeKantor == users!.kodeInduk).isNotEmpty
+          ? listKantor.where((e) => e.kodeKantor == users!.kodeInduk).first
+          : kantorModel;
     }
 
     notifyListeners();

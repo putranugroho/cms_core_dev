@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:accounting_kantor_gl_useraccess/models/index.dart';
-import 'package:accounting_kantor_gl_useraccess/repository/SetupRepository.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/dialog_loading.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/informationdialog.dart';
+import 'package:cms_core/models/index.dart';
+import 'package:cms_core/repository/SetupRepository.dart';
+import 'package:cms_core/utils/dialog_loading.dart';
+import 'package:cms_core/utils/informationdialog.dart';
 import 'package:flutter/material.dart';
 
 import '../../../network/network.dart';

@@ -1,9 +1,10 @@
-import 'package:accounting_kantor_gl_useraccess/models/index.dart';
-import 'package:accounting_kantor_gl_useraccess/module/menu/menu_notifier.dart';
-import 'package:accounting_kantor_gl_useraccess/pref/pref.dart';
-import 'package:accounting_kantor_gl_useraccess/repository/ao_repository.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/dialog_loading.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/informationdialog.dart';
+import 'package:cms_core/models/index.dart';
+import 'package:cms_core/module/menu/menu_notifier.dart';
+import 'package:cms_core/pref/pref.dart';
+import 'package:cms_core/repository/ao_repository.dart';
+import 'package:cms_core/repository/hris_repository.dart';
+import 'package:cms_core/utils/dialog_loading.dart';
+import 'package:cms_core/utils/informationdialog.dart';
 import 'package:flutter/material.dart';
 
 class AoNotifier extends ChangeNotifier {
@@ -15,20 +16,23 @@ class AoNotifier extends ChangeNotifier {
 
   final keyForm = GlobalKey<FormState>();
   final keyword = TextEditingController();
-  final kodeAo = TextEditingController();
+  final employeeSearch = TextEditingController();
   final namaAo = TextEditingController();
-  final noHp = TextEditingController();
+  final nomorEmployee = TextEditingController();
   final kodeKantor = TextEditingController();
+  final kodeAo = TextEditingController();
+  final noHp = TextEditingController();
 
   List<AoModel> list = [];
-  List<KantorModel> listKantor = [];
+  List<HrisEmployeeModel> employeeResults = [];
   AoModel? selected;
-  KantorModel? kantorModel;
+  HrisEmployeeModel? selectedEmployee;
   bool isLoading = true;
-  bool isLoadingKantor = true;
+  bool loadingEmployee = false;
   bool dialog = false;
   bool editData = false;
   String? errorMessage;
+  String? employeeError;
   String? kantorError;
 
   int? filterRoleAo;
@@ -40,14 +44,13 @@ class AoNotifier extends ChangeNotifier {
   bool canUpdate = false;
   bool canDelete = false;
 
-  String _defaultKodeKantor = '001';
+  String _currentBprId = '609999';
 
   Future<void> _init() async {
     final pref = Pref();
     isSuperAdmin = await pref.getIsSuperAdmin();
     final users = await pref.getUsers();
-    _defaultKodeKantor = users.kodeKantor.isNotEmpty ? users.kodeKantor : '001';
-    kodeKantor.text = _defaultKodeKantor;
+    _currentBprId = users.kodePt.trim().isNotEmpty ? users.kodePt.trim() : '609999';
 
     final access = await pref.getCoreAccessList();
     CoreAccessModel? current;
@@ -61,42 +64,44 @@ class AoNotifier extends ChangeNotifier {
     canUpdate = isSuperAdmin || (current?.canUpdate ?? false);
     canDelete = isSuperAdmin || (current?.canDelete ?? false);
 
-    await getKantorList();
     await getAo();
   }
 
-  Future<void> getKantorList() async {
-    isLoadingKantor = true;
+  Future<void> searchEmployee() async {
+    final keyword = employeeSearch.text.trim();
+    if (keyword.length < 2) {
+      employeeResults = [];
+      employeeError = 'Masukkan minimal 2 karakter nama / employee no / no HP.';
+      selectedEmployee = null;
+      notifyListeners();
+      return;
+    }
+
+    loadingEmployee = true;
+    employeeError = null;
+    employeeResults = [];
+    selectedEmployee = null;
     notifyListeners();
 
     try {
-      listKantor = await AoRepository.listKantor(limit: 500);
-      listKantor.sort((a, b) => a.kodeKantor.compareTo(b.kodeKantor));
-      kantorModel = _findKantor(kodeKantor.text);
-      if (kantorModel != null) {
-        kodeKantor.text = kantorModel!.kodeKantor;
-      }
+      final rows = await HrisRepository.searchEmployee(bprId: _currentBprId, search: keyword);
+      employeeResults = rows;
+      employeeError = rows.isEmpty ? 'Employee tidak ditemukan di HRIS. AO baru harus dipilih dari employee HRIS.' : null;
     } catch (e) {
-      listKantor = [];
-      kantorModel = null;
+      employeeError = e.toString();
     }
 
-    isLoadingKantor = false;
+    loadingEmployee = false;
     notifyListeners();
   }
 
-  KantorModel? _findKantor(String kode) {
-    final normalized = kode.trim();
-    if (normalized.isEmpty) return null;
-    for (final kantor in listKantor) {
-      if (kantor.kodeKantor.trim() == normalized) return kantor;
-    }
-    return null;
-  }
-
-  void pilihKantor(KantorModel? value) {
-    kantorModel = value;
-    kodeKantor.text = value?.kodeKantor ?? '';
+  void pilihEmployee(HrisEmployeeModel employee) {
+    selectedEmployee = employee;
+    employeeError = null;
+    nomorEmployee.text = employee.employeeNo.trim();
+    namaAo.text = employee.name.trim().toUpperCase();
+    kodeKantor.text = employee.officeCode.trim();
+    noHp.text = employee.phone.trim();
     kantorError = null;
     notifyListeners();
   }
@@ -155,14 +160,18 @@ class AoNotifier extends ChangeNotifier {
 
   void clear() {
     selected = null;
+    selectedEmployee = null;
+    employeeResults = [];
+    employeeError = null;
     editData = false;
-    kodeAo.clear();
+    employeeSearch.clear();
     namaAo.clear();
+    nomorEmployee.clear();
+    kodeKantor.clear();
+    kodeAo.clear();
     noHp.clear();
     roleAo = 1;
     kantorError = null;
-    kodeKantor.text = _defaultKodeKantor;
-    kantorModel = _findKantor(_defaultKodeKantor);
   }
 
   Future<void> edit(AoModel value) async {
@@ -183,23 +192,36 @@ class AoNotifier extends ChangeNotifier {
 
     editData = true;
     dialog = true;
-    kodeAo.text = selected?.kodeAo ?? value.kodeAo;
+    selectedEmployee = null;
+    employeeResults = [];
+    employeeError = null;
+    employeeSearch.clear();
     namaAo.text = selected?.namaAo ?? value.namaAo;
+    nomorEmployee.text = selected?.nomorEmployee ?? value.nomorEmployee;
+    kodeKantor.text = selected?.kodeKantor ?? value.kodeKantor;
+    kodeAo.text = selected?.kodeAo ?? value.kodeAo;
     noHp.text = selected?.noHp ?? value.noHp;
     roleAo = selected?.roleAo ?? value.roleAo;
-    kodeKantor.text = selected?.kodeKantor ?? value.kodeKantor;
-    kantorModel = _findKantor(kodeKantor.text);
     kantorError = null;
     notifyListeners();
   }
 
   Future<void> cek() async {
     kantorError = null;
+
+    if (!editData && selectedEmployee == null) {
+      employeeError = 'Cari dan pilih employee HRIS terlebih dahulu sebelum membuat AO.';
+      notifyListeners();
+      informationDialog(context, 'Warning', employeeError!);
+      return;
+    }
+
     if (!(keyForm.currentState?.validate() ?? false)) return;
 
     if (kodeKantor.text.trim().isEmpty) {
-      kantorError = 'Pilih kantor AO';
+      kantorError = 'Kode kantor wajib terisi dari response inquiry employee HRIS.';
       notifyListeners();
+      informationDialog(context, 'Warning', kantorError!);
       return;
     }
 
@@ -208,6 +230,7 @@ class AoNotifier extends ChangeNotifier {
       await AoRepository.save(
         isEdit: editData,
         kodeAo: kodeAo.text,
+        nomorEmployee: nomorEmployee.text,
         namaAo: namaAo.text,
         noHp: noHp.text,
         roleAo: roleAo,
@@ -267,10 +290,12 @@ class AoNotifier extends ChangeNotifier {
   @override
   void dispose() {
     keyword.dispose();
-    kodeAo.dispose();
+    employeeSearch.dispose();
     namaAo.dispose();
-    noHp.dispose();
+    nomorEmployee.dispose();
     kodeKantor.dispose();
+    kodeAo.dispose();
+    noHp.dispose();
     super.dispose();
   }
 }

@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:accounting_kantor_gl_useraccess/models/index.dart';
-import 'package:accounting_kantor_gl_useraccess/network/network.dart';
-import 'package:accounting_kantor_gl_useraccess/repository/SetupRepository.dart';
+import 'package:cms_core/models/index.dart';
+import 'package:cms_core/network/network.dart';
+import 'package:cms_core/repository/SetupRepository.dart';
 
 class AoRepository {
   static bool isSuccess(dynamic value) {
@@ -32,42 +32,6 @@ class AoRepository {
     return <String, dynamic>{};
   }
 
-
-  static Future<List<KantorModel>> listKantor({
-    String keyword = '',
-    String statusAktif = '',
-    String statusData = 'A',
-    int page = 1,
-    int limit = 500,
-  }) async {
-    final body = <String, dynamic>{
-      'kode_kantor': keyword.trim(),
-      'nama': keyword.trim(),
-      'alamat': '',
-      'kota': '',
-      'telp': '',
-      'nomor_fax': '',
-      'kode_pos': '',
-      'bprid': '',
-      'status_kantor': null,
-      'status_aktif': statusAktif.trim(),
-      'status_data': statusData.trim(),
-      'page': page,
-      'limit': limit,
-    };
-
-    final value = await Setuprepository.fetch(NetworkURL.getKantor(), body);
-    if (!isSuccess(value)) {
-      throw Exception(message(value, 'Gagal memuat data kantor'));
-    }
-
-    return _extractRows(value)
-        .whereType<Map>()
-        .map((e) => KantorModel.fromJson(Map<String, dynamic>.from(e)))
-        .where((e) => e.statusData.trim().isEmpty || e.statusData.trim().toUpperCase() == 'A')
-        .toList();
-  }
-
   static Future<List<AoModel>> list({
     String keyword = '',
     int? roleAo,
@@ -78,6 +42,7 @@ class AoRepository {
   }) async {
     final body = <String, dynamic>{
       'kode_ao': keyword.trim(),
+      'nomor_employee': keyword.trim(),
       'nama_ao': keyword.trim(),
       'no_hp': keyword.trim(),
       'role_ao': roleAo,
@@ -92,10 +57,7 @@ class AoRepository {
       throw Exception(message(value, 'Gagal memuat data AO'));
     }
 
-    return _extractRows(value)
-        .whereType<Map>()
-        .map((e) => AoModel.fromJson(Map<String, dynamic>.from(e)))
-        .toList();
+    return _extractRows(value).whereType<Map>().map((e) => AoModel.fromJson(Map<String, dynamic>.from(e))).toList();
   }
 
   static Future<AoModel> detail(String kodeAo) async {
@@ -112,6 +74,7 @@ class AoRepository {
   static Future<AoModel?> save({
     required bool isEdit,
     required String kodeAo,
+    required String nomorEmployee,
     required String namaAo,
     required String noHp,
     required int roleAo,
@@ -119,6 +82,7 @@ class AoRepository {
   }) async {
     final body = <String, dynamic>{
       'kode_ao': kodeAo.trim().toUpperCase(),
+      'nomor_employee': nomorEmployee.trim(),
       'nama_ao': namaAo.trim().toUpperCase(),
       'no_hp': noHp.trim(),
       'role_ao': roleAo,

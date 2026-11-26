@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:accounting_kantor_gl_useraccess/module/auth/login_page.dart';
-import 'package:accounting_kantor_gl_useraccess/module/menu/menu_page.dart';
-import 'package:accounting_kantor_gl_useraccess/network/network.dart';
-import 'package:accounting_kantor_gl_useraccess/pref/pref.dart';
-import 'package:accounting_kantor_gl_useraccess/repository/SetupRepository.dart';
+import 'package:cms_core/module/auth/login_page.dart';
+import 'package:cms_core/module/menu/menu_page.dart';
+import 'package:cms_core/network/network.dart';
+import 'package:cms_core/pref/pref.dart';
+import 'package:cms_core/repository/SetupRepository.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreenNotifier extends ChangeNotifier {

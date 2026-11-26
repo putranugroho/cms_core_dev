@@ -9,6 +9,9 @@ class CoreUserModel {
   final bool isSuperAdmin;
   final int wrongPasswordCount;
   final bool isLocked;
+  final String hrisEmployeeId;
+  final String hrisEmployeeNo;
+  final String hrisEmployeeName;
   final String lastLoginAt;
   final String createdAt;
   final String createdBy;
@@ -26,6 +29,9 @@ class CoreUserModel {
     required this.isSuperAdmin,
     required this.wrongPasswordCount,
     required this.isLocked,
+    required this.hrisEmployeeId,
+    required this.hrisEmployeeNo,
+    required this.hrisEmployeeName,
     required this.lastLoginAt,
     required this.createdAt,
     required this.createdBy,
@@ -45,6 +51,9 @@ class CoreUserModel {
       isSuperAdmin: false,
       wrongPasswordCount: 0,
       isLocked: false,
+      hrisEmployeeId: '',
+      hrisEmployeeNo: '',
+      hrisEmployeeName: '',
       lastLoginAt: '',
       createdAt: '',
       createdBy: '',
@@ -65,6 +74,9 @@ class CoreUserModel {
       isSuperAdmin: _toBool(json['is_super_admin']),
       wrongPasswordCount: _toInt(json['wrong_password_count'], 0),
       isLocked: _toBool(json['is_locked']),
+      hrisEmployeeId: (json['hris_employee_id'] ?? json['employee_id'] ?? '').toString(),
+      hrisEmployeeNo: (json['employee_no'] ?? json['hris_employee_no'] ?? json['nomor_employee'] ?? json['nomor_employe'] ?? '').toString(),
+      hrisEmployeeName: (json['hris_employee_name'] ?? json['employee_name'] ?? '').toString(),
       lastLoginAt: _dateToString(json['last_login_at']),
       createdAt: _dateToString(json['created_at']),
       createdBy: (json['created_by'] ?? '').toString(),
@@ -84,6 +96,9 @@ class CoreUserModel {
         'is_super_admin': isSuperAdmin,
         'wrong_password_count': wrongPasswordCount,
         'is_locked': isLocked,
+        'hris_employee_id': hrisEmployeeId,
+        'employee_no': hrisEmployeeNo,
+        'hris_employee_name': hrisEmployeeName,
         'last_login_at': lastLoginAt,
         'created_at': createdAt,
         'created_by': createdBy,
@@ -102,6 +117,9 @@ class CoreUserModel {
     bool? isSuperAdmin,
     int? wrongPasswordCount,
     bool? isLocked,
+    String? hrisEmployeeId,
+    String? hrisEmployeeNo,
+    String? hrisEmployeeName,
     String? lastLoginAt,
     String? createdAt,
     String? createdBy,
@@ -119,6 +137,9 @@ class CoreUserModel {
       isSuperAdmin: isSuperAdmin ?? this.isSuperAdmin,
       wrongPasswordCount: wrongPasswordCount ?? this.wrongPasswordCount,
       isLocked: isLocked ?? this.isLocked,
+      hrisEmployeeId: hrisEmployeeId ?? this.hrisEmployeeId,
+      hrisEmployeeNo: hrisEmployeeNo ?? this.hrisEmployeeNo,
+      hrisEmployeeName: hrisEmployeeName ?? this.hrisEmployeeName,
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
       createdAt: createdAt ?? this.createdAt,
       createdBy: createdBy ?? this.createdBy,

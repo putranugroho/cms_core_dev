@@ -68,6 +68,11 @@ export 'sandi_model.dart';
 export 'print_setup_models.dart';
 export 'lending_setup_models.dart';
 export 'saving_product_model.dart';
+export 'deposit_product_model.dart';
+export 'loan_product_model.dart';
+export 'hris_employee_model.dart';
+export 'new_menu_models.dart';
+export 'rab_model.dart';
 import 'package:quiver/core.dart';
 
 T? checkOptional<T>(Optional<T?>? optional, T? Function()? def) {

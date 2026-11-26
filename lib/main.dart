@@ -1,5 +1,5 @@
-import 'package:accounting_kantor_gl_useraccess/module/splash_screen_page.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/custom_scroll.dart';
+import 'package:cms_core/module/splash_screen_page.dart';
+import 'package:cms_core/utils/custom_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 

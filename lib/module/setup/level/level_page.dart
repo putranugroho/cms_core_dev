@@ -1,6 +1,6 @@
-import 'package:accounting_kantor_gl_useraccess/models/index.dart';
-import 'package:accounting_kantor_gl_useraccess/module/setup/level/level_notifier.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/button_custom.dart';
+import 'package:cms_core/models/index.dart';
+import 'package:cms_core/module/setup/level/level_notifier.dart';
+import 'package:cms_core/utils/button_custom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -234,9 +234,7 @@ class LevelPage extends StatelessWidget {
                                 textInputAction: TextInputAction.done,
                                 controller: value.level,
                                 maxLines: 1,
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly
-                                ],
+                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                 validator: (e) {
                                   if (e!.isEmpty) {
                                     return "Wajib diisi";

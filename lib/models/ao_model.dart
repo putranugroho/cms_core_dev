@@ -1,6 +1,7 @@
 class AoModel {
   final String id;
   final String kodeAo;
+  final String nomorEmployee;
   final String namaAo;
   final String noHp;
   final int roleAo;
@@ -17,6 +18,7 @@ class AoModel {
   const AoModel({
     required this.id,
     required this.kodeAo,
+    required this.nomorEmployee,
     required this.namaAo,
     required this.noHp,
     required this.roleAo,
@@ -35,6 +37,7 @@ class AoModel {
     return const AoModel(
       id: '',
       kodeAo: '',
+      nomorEmployee: '',
       namaAo: '',
       noHp: '',
       roleAo: 1,
@@ -55,8 +58,9 @@ class AoModel {
     return AoModel(
       id: (json['id'] ?? '').toString(),
       kodeAo: (json['kode_ao'] ?? json['kode'] ?? '').toString(),
+      nomorEmployee: (json['nomor_employee'] ?? json['nomor_employe'] ?? json['employee_no'] ?? json['no_employee'] ?? '').toString(),
       namaAo: (json['nama_ao'] ?? json['nama'] ?? '').toString(),
-      noHp: (json['no_hp'] ?? json['nohp'] ?? '').toString(),
+      noHp: (json['no_hp'] ?? json['nohp'] ?? json['phone'] ?? '').toString(),
       roleAo: role,
       roleAoTxt: (json['role_ao_txt'] ?? _roleText(role)).toString(),
       kodeKantor: (json['kode_kantor'] ?? json['kd_kantor'] ?? '').toString(),
@@ -73,6 +77,7 @@ class AoModel {
   Map<String, dynamic> toJson() => {
         'id': id,
         'kode_ao': kodeAo,
+        'nomor_employee': nomorEmployee,
         'nama_ao': namaAo,
         'no_hp': noHp,
         'role_ao': roleAo,
@@ -90,6 +95,7 @@ class AoModel {
   AoModel copyWith({
     String? id,
     String? kodeAo,
+    String? nomorEmployee,
     String? namaAo,
     String? noHp,
     int? roleAo,
@@ -107,6 +113,7 @@ class AoModel {
     return AoModel(
       id: id ?? this.id,
       kodeAo: kodeAo ?? this.kodeAo,
+      nomorEmployee: nomorEmployee ?? this.nomorEmployee,
       namaAo: namaAo ?? this.namaAo,
       noHp: noHp ?? this.noHp,
       roleAo: nextRole,

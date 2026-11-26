@@ -1,5 +1,5 @@
-import 'package:accounting_kantor_gl_useraccess/module/menu/menu_notifier.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/images_path.dart';
+import 'package:cms_core/module/menu/menu_notifier.dart';
+import 'package:cms_core/utils/images_path.dart';
 import 'package:flutter/material.dart';
 
 class MenuKantorGlWidget extends StatelessWidget {
@@ -18,12 +18,12 @@ class MenuKantorGlWidget extends StatelessWidget {
       children: [
         if (setup.isNotEmpty) ...[
           const _SectionTitle(title: 'SETUP'),
-          ...setup.map((item) => _BuildMenuItem(item: item, value: value)),
+          ..._buildGroupedItems(setup),
           const SizedBox(height: 12),
         ],
         if (master.isNotEmpty) ...[
           const _SectionTitle(title: 'MASTER'),
-          ..._buildMasterItems(master),
+          ..._buildGroupedItems(master),
           const SizedBox(height: 12),
         ],
         if (others.isNotEmpty) ...[
@@ -34,7 +34,7 @@ class MenuKantorGlWidget extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildMasterItems(List<CoreMenuItem> items) {
+  List<Widget> _buildGroupedItems(List<CoreMenuItem> items) {
     final widgets = <Widget>[];
     final grouped = <String, List<CoreMenuItem>>{};
     final direct = <CoreMenuItem>[];
@@ -121,6 +121,7 @@ class _ParentMenuGroup extends StatelessWidget {
                   item: item,
                   value: value,
                   dense: true,
+                  onLightBackground: active,
                 ),
               )
               .toList(),
@@ -134,8 +135,9 @@ class _BuildMenuItem extends StatelessWidget {
   final CoreMenuItem item;
   final MenuNotifier value;
   final bool dense;
+  final bool onLightBackground;
 
-  const _BuildMenuItem({required this.item, required this.value, this.dense = false});
+  const _BuildMenuItem({required this.item, required this.value, this.dense = false, this.onLightBackground = false});
 
   @override
   Widget build(BuildContext context) {
@@ -146,6 +148,7 @@ class _BuildMenuItem extends StatelessWidget {
         icon: _iconFor(item.icon),
         selected: value.page == item.page,
         dense: dense,
+        onLightBackground: onLightBackground,
         onTap: () => value.gantimenu(item.page),
       ),
     );
@@ -177,6 +180,7 @@ class _MenuItem extends StatelessWidget {
   final String icon;
   final bool selected;
   final bool dense;
+  final bool onLightBackground;
   final VoidCallback onTap;
 
   const _MenuItem({
@@ -185,10 +189,14 @@ class _MenuItem extends StatelessWidget {
     required this.selected,
     required this.onTap,
     this.dense = false,
+    this.onLightBackground = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final foregroundColor = selected || onLightBackground ? Colors.black87 : Colors.white;
+    final iconColor = selected || onLightBackground ? Colors.black87 : Colors.white;
+
     return InkWell(
       borderRadius: BorderRadius.circular(8),
       onTap: onTap,
@@ -205,7 +213,7 @@ class _MenuItem extends StatelessWidget {
             Image.asset(
               icon,
               height: dense ? 20 : 24,
-              color: selected ? Colors.black : Colors.white,
+              color: iconColor,
             ),
             SizedBox(width: dense ? 12 : 16),
             Expanded(
@@ -213,7 +221,7 @@ class _MenuItem extends StatelessWidget {
                 title,
                 style: TextStyle(
                   fontSize: dense ? 14 : 16,
-                  color: selected ? Colors.black : Colors.white,
+                  color: foregroundColor,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                 ),
               ),

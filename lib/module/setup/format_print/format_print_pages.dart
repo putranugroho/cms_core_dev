@@ -1,16 +1,38 @@
 import 'dart:convert';
 
-import 'package:accounting_kantor_gl_useraccess/models/index.dart';
-import 'package:accounting_kantor_gl_useraccess/network/network.dart';
-import 'package:accounting_kantor_gl_useraccess/pref/pref.dart';
-import 'package:accounting_kantor_gl_useraccess/repository/SetupRepository.dart';
-import 'package:accounting_kantor_gl_useraccess/repository/print_setup_repository.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/colors.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/dialog_loading.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/informationdialog.dart';
+import 'package:cms_core/models/index.dart';
+import 'package:cms_core/network/network.dart';
+import 'package:cms_core/pref/pref.dart';
+import 'package:cms_core/repository/SetupRepository.dart';
+import 'package:cms_core/repository/print_setup_repository.dart';
+import 'package:cms_core/utils/colors.dart';
+import 'package:cms_core/utils/dialog_loading.dart';
+import 'package:cms_core/utils/informationdialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+
+// Explicit API flags take precedence over coordinates, including zero positions.
+bool _printFlag(dynamic value, {required bool fallback}) {
+  if (value is bool) return value;
+  switch (value?.toString().trim().toLowerCase()) {
+    case 'true':
+    case '1':
+      return true;
+    case 'false':
+    case '0':
+      return false;
+    default:
+      return fallback;
+  }
+}
+
+bool _fieldIsVisible(FormatPrintConfig config, PrintFieldDef field, Map<String, dynamic> data) {
+  final legacyVisible = data[field.xField] != null || data[field.yField] != null;
+  return config.hasVisibilityFlags
+      ? _printFlag(data['${field.key}_flag'], fallback: legacyVisible)
+      : legacyVisible;
+}
 
 class FormatBukuPage extends StatelessWidget {
   const FormatBukuPage({super.key});
@@ -43,6 +65,11 @@ class PrintFieldDef {
   const PrintFieldDef(this.label, this.xField, this.yField, {this.defaultX = 5, this.defaultY = 5});
 
   String get key => xField.replaceAll('_x', '');
+
+  bool get isQrCode => key == 'qr_code';
+  // Fixed print size: 1 x 1 cm, while layout coordinates use mm.
+  double get widthMm => isQrCode ? 20 : 0;
+  double get heightMm => isQrCode ? 20 : 0;
 }
 
 class BaseFieldDef {
@@ -97,6 +124,8 @@ class FormatPrintConfig {
     required this.paperWidthMm,
     required this.paperHeightMm,
   });
+
+  bool get hasVisibilityFlags => keyField == 'kode_format_bilyet';
 
   factory FormatPrintConfig.formatBuku() {
     return FormatPrintConfig(
@@ -206,6 +235,7 @@ class FormatPrintConfig {
         PrintFieldDef('Nama AO', 'nama_ao_x', 'nama_ao_y', defaultX: 90, defaultY: 60),
         PrintFieldDef('Logo', 'logo_x', 'logo_y', defaultX: 125, defaultY: 10),
         PrintFieldDef('Tanda Tangan', 'tanda_tangan_x', 'tanda_tangan_y', defaultX: 90, defaultY: 75),
+        PrintFieldDef('QR Code', 'qr_code_x', 'qr_code_y', defaultX: 140, defaultY: 75),
       ],
     );
   }
@@ -265,6 +295,7 @@ class FormatPrintNotifier extends ChangeNotifier {
   bool isLoading = true;
   bool dialog = false;
   bool editData = false;
+  bool fontSizeVisible = true;
   String statusData = 'A';
   String? errorMessage;
   bool isSuperAdmin = false;
@@ -369,6 +400,7 @@ class FormatPrintNotifier extends ChangeNotifier {
   void clear() {
     selected = null;
     editData = false;
+    fontSizeVisible = true;
     for (final controller in controllers.values) {
       controller.clear();
     }
@@ -382,6 +414,7 @@ class FormatPrintNotifier extends ChangeNotifier {
   }
 
   void _fill(Map<String, dynamic> data) {
+    fontSizeVisible = _printFlag(data['font_size_flag'], fallback: true);
     for (final field in config.baseFields) {
       controllers[field.field]?.text = (data[field.field] ?? '').toString();
     }
@@ -390,7 +423,7 @@ class FormatPrintNotifier extends ChangeNotifier {
       final y = data[field.yField];
       controllers[field.xField]?.text = _fmt(PrintValue.toDouble(x, field.defaultX));
       controllers[field.yField]?.text = _fmt(PrintValue.toDouble(y, field.defaultY));
-      fieldVisible[field.key] = x != null || y != null;
+      fieldVisible[field.key] = _fieldIsVisible(config, field, data);
     }
   }
 
@@ -405,8 +438,8 @@ class FormatPrintNotifier extends ChangeNotifier {
   }
 
   void updateFieldPosition(PrintFieldDef field, double x, double y) {
-    controllers[field.xField]?.text = _fmt(x.clamp(0, config.paperWidthMm));
-    controllers[field.yField]?.text = _fmt(y.clamp(0, config.paperHeightMm));
+    controllers[field.xField]?.text = _fmt(x.clamp(0, config.paperWidthMm - field.widthMm));
+    controllers[field.yField]?.text = _fmt(y.clamp(0, config.paperHeightMm - field.heightMm));
     fieldVisible[field.key] = true;
     notifyListeners();
   }
@@ -449,8 +482,19 @@ class FormatPrintNotifier extends ChangeNotifier {
     }
     for (final field in config.printFields) {
       final visible = fieldVisible[field.key] ?? true;
-      body[field.xField] = visible ? double.tryParse(controllers[field.xField]?.text.trim() ?? '') : null;
-      body[field.yField] = visible ? double.tryParse(controllers[field.yField]?.text.trim() ?? '') : null;
+      if (config.hasVisibilityFlags) {
+        body['${field.key}_flag'] = visible;
+        // Preserve positions while disabled, so enabling again restores the layout.
+        body[field.xField] = double.tryParse(controllers[field.xField]?.text.trim() ?? '') ?? field.defaultX;
+        body[field.yField] = double.tryParse(controllers[field.yField]?.text.trim() ?? '') ?? field.defaultY;
+      } else {
+        body[field.xField] = visible ? double.tryParse(controllers[field.xField]?.text.trim() ?? '') : null;
+        body[field.yField] = visible ? double.tryParse(controllers[field.yField]?.text.trim() ?? '') : null;
+      }
+    }
+    if (config.hasVisibilityFlags) {
+      body['font_size_flag'] = fontSizeVisible;
+      body['qr_code_size'] = 10; // 1 x 1 cm, in the gateway's mm units.
     }
     return body;
   }
@@ -686,6 +730,16 @@ class _FormatEditor extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
                           ...value.config.baseFields.map((field) => _input(value, field)),
+                          if (value.config.hasVisibilityFlags)
+                            CheckboxListTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: const Text('Gunakan Font Size'),
+                              value: value.fontSizeVisible,
+                              onChanged: (enabled) {
+                                value.fontSizeVisible = enabled ?? false;
+                                value.refreshPreview();
+                              },
+                            ),
                           const SizedBox(height: 8),
                           const Text('Field Print', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           const SizedBox(height: 8),
@@ -717,7 +771,8 @@ class _FormatEditor extends StatelessWidget {
                         children: [
                           const Text('Preview Layout Print', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                           const SizedBox(height: 6),
-                          Text('Geser field di area preview, atau isi koordinat X/Y dalam mm di panel kiri.', style: TextStyle(color: Colors.grey.shade700)),
+                          Text('Geser field di area preview, atau isi koordinat X/Y dalam mm di panel kiri.',
+                              style: TextStyle(color: Colors.grey.shade700)),
                           const SizedBox(height: 16),
                           Expanded(child: _PrintPreview(value: value)),
                         ],
@@ -763,12 +818,21 @@ class _FormatEditor extends StatelessWidget {
       child: Row(
         children: [
           Checkbox(value: visible, onChanged: (v) => value.toggleField(field, v), activeColor: colorPrimary),
-          Expanded(child: Text(field.label, style: const TextStyle(fontWeight: FontWeight.w600))),
+          Expanded(child: Text(field.isQrCode ? '${field.label} (1 × 1 cm)' : field.label, style: const TextStyle(fontWeight: FontWeight.w600))),
           SizedBox(
             width: 84,
             child: TextFormField(
               controller: value.controllers[field.xField],
               enabled: visible,
+              validator: (text) {
+                if (!visible || !field.isQrCode) return null;
+                final position = double.tryParse(text ?? '');
+                final maximum = value.config.paperWidthMm - field.widthMm;
+                if (position == null || position < 0 || position > maximum) {
+                  return '0–${maximum.toInt()} mm';
+                }
+                return null;
+              },
               onChanged: (_) => value.refreshPreview(),
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
@@ -781,6 +845,15 @@ class _FormatEditor extends StatelessWidget {
             child: TextFormField(
               controller: value.controllers[field.yField],
               enabled: visible,
+              validator: (text) {
+                if (!visible || !field.isQrCode) return null;
+                final position = double.tryParse(text ?? '');
+                final maximum = value.config.paperHeightMm - field.heightMm;
+                if (position == null || position < 0 || position > maximum) {
+                  return '0–${maximum.toInt()} mm';
+                }
+                return null;
+              },
               onChanged: (_) => value.refreshPreview(),
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
@@ -795,18 +868,47 @@ class _FormatEditor extends StatelessWidget {
 
 class _PrintPreview extends StatelessWidget {
   final FormatPrintNotifier value;
-
   const _PrintPreview({required this.value});
+  @override
+  Widget build(BuildContext context) => FormatLayoutPreview(
+        config: value.config,
+        data: {
+          'font_size': value.controllers['font_size']?.text,
+          if (value.config.hasVisibilityFlags) ...{
+            'font_size_flag': value.fontSizeVisible,
+            'qr_code_size': 10,
+          },
+          for (final field in value.config.printFields) ...{
+            if (value.config.hasVisibilityFlags) '${field.key}_flag': value.fieldVisible[field.key] ?? true,
+            field.xField: (value.fieldVisible[field.key] ?? true) ? value.controllers[field.xField]?.text : null,
+            field.yField: (value.fieldVisible[field.key] ?? true) ? value.controllers[field.yField]?.text : null,
+          },
+        },
+        onMove: value.updateFieldPosition,
+      );
+}
+
+class FormatLayoutPreview extends StatelessWidget {
+  final FormatPrintConfig config;
+  final Map<String, dynamic> data;
+  final void Function(PrintFieldDef, double, double)? onMove;
+
+  const FormatLayoutPreview({super.key, required this.config, required this.data, this.onMove});
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final scaleX = (constraints.maxWidth - 24) / value.config.paperWidthMm;
-        final scaleY = (constraints.maxHeight - 24) / value.config.paperHeightMm;
+        if (constraints.maxWidth <= 24 || constraints.maxHeight <= 24) return const SizedBox.shrink();
+        final qrSize = PrintValue.toDouble(data['qr_code_size'], 10);
+        final qrSizeMm = qrSize.isFinite && qrSize > 0 ? qrSize : 10.0;
+        final useFontSize = !config.hasVisibilityFlags || _printFlag(data['font_size_flag'], fallback: true);
+        final previewFontSize = useFontSize ? PrintValue.toDouble(data['font_size'], 10) : 10.0;
+        final scaleX = (constraints.maxWidth - 24) / config.paperWidthMm;
+        final scaleY = (constraints.maxHeight - 24) / config.paperHeightMm;
         final scale = scaleX < scaleY ? scaleX : scaleY;
-        final width = value.config.paperWidthMm * scale;
-        final height = value.config.paperHeightMm * scale;
+        final width = config.paperWidthMm * scale;
+        final height = config.paperHeightMm * scale;
         return Center(
           child: Container(
             width: width,
@@ -819,21 +921,39 @@ class _PrintPreview extends StatelessWidget {
             child: Stack(
               children: [
                 Positioned.fill(child: CustomPaint(painter: _GridPainter(scale: scale))),
-                ...value.config.printFields.where((field) => value.fieldVisible[field.key] ?? true).map((field) {
-                  final x = double.tryParse(value.controllers[field.xField]?.text ?? '') ?? field.defaultX;
-                  final y = double.tryParse(value.controllers[field.yField]?.text ?? '') ?? field.defaultY;
+                ...config.printFields.where((field) => _fieldIsVisible(config, field, data)).map((field) {
+                  final x = double.tryParse((data[field.xField] ?? '').toString()) ?? field.defaultX;
+                  final y = double.tryParse((data[field.yField] ?? '').toString()) ?? field.defaultY;
                   return Positioned(
                     left: x * scale,
                     top: y * scale,
                     child: GestureDetector(
-                      onPanUpdate: (detail) {
-                        value.updateFieldPosition(field, x + detail.delta.dx / scale, y + detail.delta.dy / scale);
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                        decoration: BoxDecoration(color: colorPrimary.withOpacity(0.12), border: Border.all(color: colorPrimary), borderRadius: BorderRadius.circular(4)),
-                        child: Text(field.label, style: TextStyle(fontSize: (double.tryParse(value.controllers['font_size']?.text ?? '') ?? 10).clamp(8, 18), fontWeight: FontWeight.w600)),
-                      ),
+                      onPanUpdate: onMove == null
+                          ? null
+                          : (detail) {
+                              onMove!(field, x + detail.delta.dx / scale, y + detail.delta.dy / scale);
+                            },
+                      child: field.isQrCode
+                          ? Tooltip(
+                              message: 'QR Code · $qrSizeMm × $qrSizeMm mm (penanda layout)',
+                              child: Container(
+                                width: qrSizeMm * scale,
+                                height: qrSizeMm * scale,
+                                color: Colors.white,
+                                child: Icon(Icons.qr_code, size: qrSizeMm * scale, color: Colors.black),
+                              ),
+                            )
+                          : Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                              decoration: BoxDecoration(
+                                  color: colorPrimary.withOpacity(0.12),
+                                  border: Border.all(color: colorPrimary),
+                                  borderRadius: BorderRadius.circular(4)),
+                              child: Text(field.label,
+                                  style: TextStyle(
+                                      fontSize: previewFontSize.clamp(8, 18),
+                                      fontWeight: FontWeight.w600)),
+                            ),
                     ),
                   );
                 }),
@@ -886,4 +1006,5 @@ class _StatusChip extends StatelessWidget {
   }
 }
 
-InputDecoration _decoration(String label) => InputDecoration(labelText: label, border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), counterText: '');
+InputDecoration _decoration(String label) =>
+    InputDecoration(labelText: label, border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), counterText: '');

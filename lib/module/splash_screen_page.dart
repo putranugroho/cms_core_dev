@@ -1,4 +1,4 @@
-import 'package:accounting_kantor_gl_useraccess/module/splash_screen_notifier.dart';
+import 'package:cms_core/module/splash_screen_notifier.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

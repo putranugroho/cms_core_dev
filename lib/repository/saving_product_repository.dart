@@ -1,6 +1,6 @@
-import 'package:accounting_kantor_gl_useraccess/models/index.dart';
-import 'package:accounting_kantor_gl_useraccess/network/network.dart';
-import 'package:accounting_kantor_gl_useraccess/repository/SetupRepository.dart';
+import 'package:cms_core/models/index.dart';
+import 'package:cms_core/network/network.dart';
+import 'package:cms_core/repository/SetupRepository.dart';
 
 class SavingProductRepository {
   static bool isSuccess(dynamic value) {
@@ -37,16 +37,47 @@ class SavingProductRepository {
     int page = 1,
     int limit = 100,
   }) async {
-    final value = await Setuprepository.fetch(NetworkURL.savingProductList(), {
-      'kode_produk': keyword.trim(),
-      'nama_produk': keyword.trim(),
-      'jenis_tabungan': jenisTabungan.trim(),
-      'status_data': statusData.trim(),
-      'page': page,
-      'limit': limit,
-    });
-    if (!isSuccess(value)) throw Exception(message(value, 'Gagal memuat produk tabungan'));
-    return rows(value).whereType<Map>().map((e) => SavingProductModel.fromJson(Map<String, dynamic>.from(e))).toList();
+    final q = keyword.trim();
+    final merged = <String, SavingProductModel>{};
+
+    Future<void> fetch(Map<String, dynamic> body) async {
+      final value = await Setuprepository.fetch(NetworkURL.savingProductList(), body);
+      if (!isSuccess(value)) throw Exception(message(value, 'Gagal memuat produk tabungan'));
+      for (final item in rows(value).whereType<Map>()) {
+        final model = SavingProductModel.fromJson(Map<String, dynamic>.from(item));
+        merged[model.kodeProduk] = model;
+      }
+    }
+
+    if (q.isEmpty) {
+      await fetch({
+        'kode_produk': '',
+        'nama_produk': '',
+        'jenis_tabungan': jenisTabungan.trim(),
+        'status_data': statusData.trim(),
+        'page': page,
+        'limit': limit,
+      });
+    } else {
+      await fetch({
+        'kode_produk': q,
+        'nama_produk': '',
+        'jenis_tabungan': jenisTabungan.trim(),
+        'status_data': statusData.trim(),
+        'page': page,
+        'limit': limit,
+      });
+      await fetch({
+        'kode_produk': '',
+        'nama_produk': q,
+        'jenis_tabungan': jenisTabungan.trim(),
+        'status_data': statusData.trim(),
+        'page': page,
+        'limit': limit,
+      });
+    }
+
+    return merged.values.toList();
   }
 
   static Future<SavingProductModel> detail(String kodeProduk) async {
@@ -63,5 +94,55 @@ class SavingProductRepository {
   static Future<void> delete(String kodeProduk) async {
     final value = await Setuprepository.fetch(NetworkURL.savingProductDelete(), {'kode_produk': kodeProduk.trim()});
     if (!isSuccess(value)) throw Exception(message(value, 'Gagal menghapus produk tabungan'));
+  }
+
+  static Future<List<CoreCoaModel>> searchCoa({String keyword = '', int limit = 30}) async {
+    final q = keyword.trim();
+    final merged = <String, CoreCoaModel>{};
+
+    Future<void> fetch(Map<String, dynamic> body) async {
+      final value = await Setuprepository.fetch(NetworkURL.getMasterGl(), body);
+      if (!isSuccess(value)) throw Exception(message(value, 'Gagal mencari COA'));
+      for (final item in rows(value).whereType<Map>()) {
+        final model = CoreCoaModel.fromJson(Map<String, dynamic>.from(item));
+        if (model.statusData.toUpperCase() == 'D') continue;
+        merged[model.kodeCoa] = model;
+      }
+    }
+
+    final baseBody = <String, dynamic>{
+      'tipe_coa': null,
+      'level_coa': null,
+      'parent_coa': '',
+      'posting_type': '',
+      'special_type': '',
+      'ojk_code': '',
+      'status_data': 'A',
+      'page': 1,
+      'limit': limit,
+    };
+
+    if (q.isEmpty) {
+      await fetch({
+        ...baseBody,
+        'kode_coa': '',
+        'nama_coa': '',
+      });
+    } else {
+      await fetch({
+        ...baseBody,
+        'kode_coa': q,
+        'nama_coa': '',
+      });
+      await fetch({
+        ...baseBody,
+        'kode_coa': '',
+        'nama_coa': q,
+      });
+    }
+
+    final result = merged.values.toList();
+    result.sort((a, b) => a.kodeCoa.compareTo(b.kodeCoa));
+    return result;
   }
 }

@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:accounting_kantor_gl_useraccess/models/index.dart';
-import 'package:accounting_kantor_gl_useraccess/network/network.dart';
-import 'package:accounting_kantor_gl_useraccess/repository/SetupRepository.dart';
+import 'package:cms_core/models/index.dart';
+import 'package:cms_core/network/network.dart';
+import 'package:cms_core/repository/SetupRepository.dart';
 
 class CoreUsersRepository {
   static String _message(dynamic value, [String fallback = '']) {
@@ -34,10 +34,7 @@ class CoreUsersRepository {
       NetworkURL.coreUsersList(),
       {'keyword': keyword.trim()},
     );
-    return _listData(value)
-        .whereType<Map>()
-        .map((e) => CoreUserModel.fromJson(Map<String, dynamic>.from(e)))
-        .toList();
+    return _listData(value).whereType<Map>().map((e) => CoreUserModel.fromJson(Map<String, dynamic>.from(e))).toList();
   }
 
   static Future<Map<String, dynamic>> detailRaw(String userid) async {
@@ -59,10 +56,7 @@ class CoreUsersRepository {
     final data = await detailRaw(userid);
     final raw = data['fasilitas'];
     if (raw is! List) return [];
-    return raw
-        .whereType<Map>()
-        .map((e) => CoreAccessModel.fromJson(Map<String, dynamic>.from(e)))
-        .toList();
+    return raw.whereType<Map>().map((e) => CoreAccessModel.fromJson(Map<String, dynamic>.from(e))).toList();
   }
 
   static Future<List<CoreAccessModel>> masterMenu() async {
@@ -70,15 +64,26 @@ class CoreUsersRepository {
       NetworkURL.coreMasterMenu(),
       {'action': 'list', 'type': ''},
     );
+    if (!isSuccess(value)) {
+      throw Exception(_message(value, 'Gagal mengambil master menu'));
+    }
     final rows = _listData(value);
-    final list = rows
-        .whereType<Map>()
-        .map((e) => CoreAccessModel.fromJson(Map<String, dynamic>.from(e)))
-        .where((e) => e.routePath.trim().isNotEmpty)
-        .toList();
+    final configuredRoutes = rows.whereType<Map>().map((row) => (row['route_path'] ?? '').toString().trim().toLowerCase()).toSet();
+    final list = rows.whereType<Map>().where((row) {
+      final active = row['is_active'];
+      if (active == null) return true;
+      if (active is bool) return active;
+      if (active is num) return active != 0;
+      return ['true', '1', 'y', 'yes', 'aktif', 'active'].contains(active.toString().trim().toLowerCase());
+    }).map((row) {
+      final item = CoreAccessModel.fromJson(Map<String, dynamic>.from(row));
+      return item.copyWith(menuId: item.masterMenuId);
+    }).toList();
+
+    bool hasRoute(String route) => configuredRoutes.contains(route.trim().toLowerCase()) || list.any((item) => item.matchesRoute(route));
 
     // Fallback lokal sampai master_menu pusat menambahkan menu AO.
-    final hasAo = list.any((e) => e.matchesRoute('/master/ao'));
+    final hasAo = hasRoute('/master/ao');
     if (!hasAo) {
       list.add(
         const CoreAccessModel(
@@ -101,8 +106,7 @@ class CoreUsersRepository {
       );
     }
 
-
-    final hasSandi = list.any((e) => e.matchesRoute('/setup/sandi'));
+    final hasSandi = hasRoute('/setup/sandi');
     if (!hasSandi) {
       list.add(
         const CoreAccessModel(
@@ -125,9 +129,7 @@ class CoreUsersRepository {
       );
     }
 
-
-
-    final hasProductTabungan = list.any((e) => e.matchesRoute('/setup/product-tabungan'));
+    final hasProductTabungan = hasRoute('/setup/product-tabungan');
     if (!hasProductTabungan) {
       list.add(
         const CoreAccessModel(
@@ -150,7 +152,7 @@ class CoreUsersRepository {
       );
     }
 
-    final hasProductDeposito = list.any((e) => e.matchesRoute('/setup/product-deposito'));
+    final hasProductDeposito = hasRoute('/setup/product-deposito');
     if (!hasProductDeposito) {
       list.add(
         const CoreAccessModel(
@@ -173,6 +175,28 @@ class CoreUsersRepository {
       );
     }
 
+    final hasProductKredit = hasRoute('/setup/product-kredit');
+    if (!hasProductKredit) {
+      list.add(
+        const CoreAccessModel(
+          id: null,
+          menuId: null,
+          userid: '',
+          modul: 'SETUP',
+          menu: 'Prod Kredit',
+          submenu: 'Prod Kredit',
+          subsubmenu: '',
+          routePath: '/setup/product-kredit',
+          canView: false,
+          canCreate: false,
+          canUpdate: false,
+          canDelete: false,
+          canApprove: false,
+          canForceLogout: false,
+          flag: '',
+        ),
+      );
+    }
 
     final fallbackMenus = <CoreAccessModel>[
       const CoreAccessModel(
@@ -314,7 +338,7 @@ class CoreUsersRepository {
     ];
 
     for (final menu in fallbackMenus) {
-      if (!list.any((e) => e.matchesRoute(menu.routePath))) {
+      if (!hasRoute(menu.routePath)) {
         list.add(menu);
       }
     }
@@ -330,8 +354,13 @@ class CoreUsersRepository {
     required String bprId,
     required String tglExpired,
     required bool isActive,
+    bool includeActive = true,
+    bool changePassword = true,
     required bool isSuperAdmin,
     required List<CoreAccessModel> fasilitas,
+    String hrisEmployeeId = '',
+    String hrisEmployeeNo = '',
+    String hrisEmployeeName = '',
   }) async {
     final body = <String, dynamic>{
       'userid': userid.trim().toUpperCase(),
@@ -339,13 +368,33 @@ class CoreUsersRepository {
       'kode_kantor': kodeKantor.trim(),
       'bpr_id': bprId.trim(),
       'tgl_expired': _normalizeDate(tglExpired),
-      'is_active': isActive,
       'is_super_admin': isSuperAdmin,
       'fasilitas': fasilitas.map((e) => e.toJson()).toList(),
     };
 
-    if (password.trim().isNotEmpty) {
+    // Jangan kirim is_active saat hanya update User Access.
+    // Status aktif/nonaktif existing user dikelola lewat endpoint /users/aktif dan /users/nonaktif
+    // supaya payload access yang stale tidak mengubah user aktif menjadi nonaktif lagi.
+    if (includeActive) {
+      body['is_active'] = isActive;
+    }
+
+    if (hrisEmployeeId.trim().isNotEmpty) {
+      body['hris_employee_id'] = hrisEmployeeId.trim();
+    }
+    if (hrisEmployeeNo.trim().isNotEmpty) {
+      body['employee_no'] = hrisEmployeeNo.trim();
+    }
+    if (hrisEmployeeName.trim().isNotEmpty) {
+      body['hris_employee_name'] = hrisEmployeeName.trim().toUpperCase();
+    }
+
+    // Password hanya dikirim kalau memang diminta secara eksplisit.
+    // Ini mencegah browser/autofill/web state mengisi field password secara tidak sengaja
+    // lalu backend mengubah password user ketika admin hanya update data/access.
+    if (changePassword && password.trim().isNotEmpty) {
       body['password'] = password.trim();
+      body['change_password'] = true;
     }
 
     final value = await Setuprepository.fetch(NetworkURL.coreUsersSave(), body);
@@ -359,17 +408,17 @@ class CoreUsersRepository {
     required CoreUserModel user,
     required List<CoreAccessModel> fasilitas,
   }) async {
-    return saveUser(
-      userid: user.userid,
-      password: '',
-      namauser: user.namauser,
-      kodeKantor: user.kodeKantor,
-      bprId: user.bprId,
-      tglExpired: user.tglExpired,
-      isActive: user.isActive,
-      isSuperAdmin: user.isSuperAdmin,
-      fasilitas: fasilitas,
-    );
+    final body = <String, dynamic>{
+      'userid': user.userid.trim().toUpperCase(),
+      'access_only': true,
+      'fasilitas': fasilitas.map((e) => e.toJson()).toList(),
+    };
+
+    final value = await Setuprepository.fetch(NetworkURL.coreUsersSave(), body);
+    if (!isSuccess(value)) {
+      throw Exception(_message(value, 'Gagal menyimpan user access'));
+    }
+    return _mapData(value);
   }
 
   static Future<Map<String, dynamic>> setActive(String userid, bool active) async {
@@ -404,10 +453,27 @@ class CoreUsersRepository {
   }
 
   static String _normalizeDate(String raw) {
-    final value = raw.trim();
-    if (value.isEmpty) return '';
-    if (value.contains(':')) return value.replaceFirst('T', ' ');
-    return '$value 23:59:59';
+    var value = raw.trim();
+    if (value.isEmpty || value == '<nil>') return '';
+
+    // Middleware menerima format tanpa timezone: yyyy-MM-dd HH:mm:ss.
+    // Data detail bisa datang sebagai ISO/RFC3339 atau string timestamp PostgreSQL,
+    // jadi normalisasi ke format yang konsisten sebelum save user/access.
+    value = value.replaceFirst('T', ' ');
+    final match = RegExp(r'^(\d{4}-\d{2}-\d{2})(?:\s+(\d{2}:\d{2}:\d{2}))?').firstMatch(value);
+    if (match != null) {
+      final date = match.group(1)!;
+      final time = match.group(2) ?? '23:59:59';
+      return '$date $time';
+    }
+
+    final parsed = DateTime.tryParse(raw.trim().replaceFirst(' ', 'T'));
+    if (parsed != null) {
+      String two(int v) => v.toString().padLeft(2, '0');
+      return '${parsed.year}-${two(parsed.month)}-${two(parsed.day)} ${two(parsed.hour)}:${two(parsed.minute)}:${two(parsed.second)}';
+    }
+
+    return value.endsWith('Z') ? value.substring(0, value.length - 1) : value;
   }
 
   static String prettyJson(dynamic value) => const JsonEncoder.withIndent('  ').convert(value);

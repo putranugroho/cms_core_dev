@@ -1,6 +1,6 @@
-import 'package:accounting_kantor_gl_useraccess/models/index.dart';
-import 'package:accounting_kantor_gl_useraccess/network/network.dart';
-import 'package:accounting_kantor_gl_useraccess/repository/SetupRepository.dart';
+import 'package:cms_core/models/index.dart';
+import 'package:cms_core/network/network.dart';
+import 'package:cms_core/repository/SetupRepository.dart';
 
 class PrintSetupRepository {
   static bool isSuccess(dynamic value) {
@@ -123,7 +123,8 @@ class PrintSetupRepository {
     return rows(value).whereType<Map>().map((e) => KodeTransaksiTabunganModel.fromJson(Map<String, dynamic>.from(e))).toList();
   }
 
-  static Future<List<SandiTransaksiBukuModel>> listSandiTransaksiBuku({String keyword = '', String statusData = 'A', int page = 1, int limit = 100}) async {
+  static Future<List<SandiTransaksiBukuModel>> listSandiTransaksiBuku(
+      {String keyword = '', String statusData = 'A', int page = 1, int limit = 100}) async {
     final value = await Setuprepository.fetch(NetworkURL.sandiTransaksiBukuList(), {
       'kode_sandi_transaksi': keyword.trim(),
       'nama_sandi_transaksi': keyword.trim(),

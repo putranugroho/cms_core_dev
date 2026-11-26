@@ -1,19 +1,31 @@
-import 'package:accounting_kantor_gl_useraccess/module/gl/gl_page.dart';
-import 'package:accounting_kantor_gl_useraccess/module/level_user/level_user_page.dart';
-import 'package:accounting_kantor_gl_useraccess/module/master/users/users_page.dart';
-import 'package:accounting_kantor_gl_useraccess/module/master/ao/ao_page.dart';
-import 'package:accounting_kantor_gl_useraccess/module/menu/menu_notifier.dart';
-import 'package:accounting_kantor_gl_useraccess/module/menu/menu_widget.dart';
-import 'package:accounting_kantor_gl_useraccess/module/setup/kantor/kantor_page.dart';
-import 'package:accounting_kantor_gl_useraccess/module/setup/product_deposito/product_deposito_page.dart';
-import 'package:accounting_kantor_gl_useraccess/module/setup/product_tabungan/product_tabungan_page.dart';
-import 'package:accounting_kantor_gl_useraccess/module/setup/sandi/sandi_page.dart';
-import 'package:accounting_kantor_gl_useraccess/module/setup/format_print/format_print_pages.dart';
-import 'package:accounting_kantor_gl_useraccess/module/setup/sandi_transaksi_buku/sandi_transaksi_buku_page.dart';
-import 'package:accounting_kantor_gl_useraccess/module/setup/lending/lending_setup_pages.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/auto_logout_wrapper.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/colors.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/images_path.dart';
+import 'package:cms_core/module/setup/digital_bilyet/bilyet_category_page.dart';
+import 'package:cms_core/module/setup/simple_menus/simple_menu_pages.dart';
+import 'package:cms_core/module/master/rab/rab_realisasi_page.dart';
+import 'package:cms_core/module/master/inventaris_operations/inventaris_assignment_page.dart';
+import 'package:cms_core/module/master/inventaris_operations/inventaris_operations_page.dart';
+import 'package:cms_core/module/gl/gl_page.dart';
+import 'package:cms_core/module/level_user/level_user_page.dart';
+import 'package:cms_core/module/master/users/users_page.dart';
+import 'package:cms_core/module/master/ao/ao_page.dart';
+import 'package:cms_core/module/menu/menu_notifier.dart';
+import 'package:cms_core/module/menu/menu_widget.dart';
+import 'package:cms_core/module/setup/kantor/kantor_page.dart';
+import 'package:cms_core/module/setup/product_deposito/product_deposito_page.dart';
+import 'package:cms_core/module/setup/product_kredit/product_kredit_page.dart';
+import 'package:cms_core/module/setup/product_tabungan/product_tabungan_page.dart';
+import 'package:cms_core/module/setup/pajak_agregat/pajak_agregat_page.dart';
+import 'package:cms_core/module/setup/sandi/sandi_page.dart';
+import 'package:cms_core/module/setup/format_print/format_print_pages.dart';
+import 'package:cms_core/module/setup/sandi_transaksi_buku/sandi_transaksi_buku_page.dart';
+import 'package:cms_core/module/setup/lending/lending_setup_pages.dart';
+import 'package:cms_core/module/setup/setup_inventaris/setup_inventaris_page.dart';
+import 'package:cms_core/module/master/new_master/new_master_pages.dart' hide AbaPage;
+import 'package:cms_core/module/master/aba/aba_page.dart';
+import 'package:cms_core/module/setup/third_party/third_party_pages.dart';
+import 'package:cms_core/module/master/rab/rab_page.dart';
+import 'package:cms_core/utils/auto_logout_wrapper.dart';
+import 'package:cms_core/utils/colors.dart';
+import 'package:cms_core/utils/images_path.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -43,7 +55,7 @@ class MenuPage extends StatelessWidget {
       case 10:
         return const FormatCoverPage();
       case 11:
-        return const FormatBilyetPage();
+        return const BilyetCategoryPage();
       case 12:
         return const SandiTransaksiBukuPage();
       case 13:
@@ -54,6 +66,40 @@ class MenuPage extends StatelessWidget {
         return const RateRakPage();
       case 16:
         return const PpapPage();
+      case 17:
+        return const PajakAgregatPage();
+      case 18:
+        return const ProductKreditPage();
+      case 19:
+        return const SetupInventarisPage();
+      case 20:
+        return const AbaPage();
+      case 21:
+        return const MitraBisnisFormPage();
+      case 22:
+        return const MasterInventarisPage();
+      case 23:
+        return const RabMarketingPage();
+      case 24:
+        return const RabKantorPage();
+      case 31:
+        return const RabRealisasiPage(key: ValueKey('rab-marketing-realisasi'), marketing: true);
+      case 32:
+        return const RabRealisasiPage(key: ValueKey('rab-kantor-realisasi'), marketing: false);
+      case 30:
+        return const InventoryAssignmentPage();
+      case 27:
+        return const InventoryOperationsPage(key: ValueKey('asset-group'), screen: InventoryScreen.group);
+      case 28:
+        return const InventoryOperationsPage(key: ValueKey('asset-revaluation'), screen: InventoryScreen.revaluation);
+      case 29:
+        return const InventoryOperationsPage(key: ValueKey('asset-disposal'), screen: InventoryScreen.disposal);
+      case 33:
+        return const SimpleMenuPage(key: ValueKey('operating-hours'), menu: SimpleMenu.hours);
+      case 34:
+        return const SimpleMenuPage(key: ValueKey('holidays'), menu: SimpleMenu.holidays);
+      case 25:
+        return const PartyGroupPage();
       default:
         if (value.menuItems.isEmpty) return const _NoAccessPage();
         return _buildPageByFirst(value.menuItems.first.page);
@@ -83,7 +129,7 @@ class MenuPage extends StatelessWidget {
       case 10:
         return const FormatCoverPage();
       case 11:
-        return const FormatBilyetPage();
+        return const BilyetCategoryPage();
       case 12:
         return const SandiTransaksiBukuPage();
       case 13:
@@ -94,6 +140,40 @@ class MenuPage extends StatelessWidget {
         return const RateRakPage();
       case 16:
         return const PpapPage();
+      case 17:
+        return const PajakAgregatPage();
+      case 18:
+        return const ProductKreditPage();
+      case 19:
+        return const SetupInventarisPage();
+      case 20:
+        return const AbaPage();
+      case 21:
+        return const MitraBisnisFormPage();
+      case 22:
+        return const MasterInventarisPage();
+      case 23:
+        return const RabMarketingPage();
+      case 24:
+        return const RabKantorPage();
+      case 31:
+        return const RabRealisasiPage(key: ValueKey('rab-marketing-realisasi'), marketing: true);
+      case 32:
+        return const RabRealisasiPage(key: ValueKey('rab-kantor-realisasi'), marketing: false);
+      case 30:
+        return const InventoryAssignmentPage();
+      case 27:
+        return const InventoryOperationsPage(key: ValueKey('asset-group'), screen: InventoryScreen.group);
+      case 28:
+        return const InventoryOperationsPage(key: ValueKey('asset-revaluation'), screen: InventoryScreen.revaluation);
+      case 29:
+        return const InventoryOperationsPage(key: ValueKey('asset-disposal'), screen: InventoryScreen.disposal);
+      case 33:
+        return const SimpleMenuPage(key: ValueKey('operating-hours'), menu: SimpleMenu.hours);
+      case 34:
+        return const SimpleMenuPage(key: ValueKey('holidays'), menu: SimpleMenu.holidays);
+      case 25:
+        return const PartyGroupPage();
       default:
         return const _NoAccessPage();
     }

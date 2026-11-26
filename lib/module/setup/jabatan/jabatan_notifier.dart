@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:accounting_kantor_gl_useraccess/models/index.dart';
-import 'package:accounting_kantor_gl_useraccess/repository/SetupRepository.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/dialog_loading.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/informationdialog.dart';
+import 'package:cms_core/models/index.dart';
+import 'package:cms_core/repository/SetupRepository.dart';
+import 'package:cms_core/utils/dialog_loading.dart';
+import 'package:cms_core/utils/informationdialog.dart';
 import 'package:flutter/material.dart';
 
 import '../../../network/network.dart';
@@ -23,8 +23,7 @@ class JabatanNotifier extends ChangeNotifier {
     isLoading = true;
     notifyListeners();
     var data = {"kode_pt": "001"};
-    Setuprepository.setup(token, NetworkURL.getLevelJabatan(), jsonEncode(data))
-        .then((value) {
+    Setuprepository.setup(token, NetworkURL.getLevelJabatan(), jsonEncode(data)).then((value) {
       if (value['status'].toString().toLowerCase().contains("success")) {
         for (Map<String, dynamic> i in value['data']) {
           list.add(LevelModel.fromJson(i));
@@ -42,8 +41,7 @@ class JabatanNotifier extends ChangeNotifier {
     listJabatan.clear();
     notifyListeners();
     var data = {"kode_pt": "001"};
-    Setuprepository.setup(token, NetworkURL.getjabatan(), jsonEncode(data))
-        .then((value) {
+    Setuprepository.setup(token, NetworkURL.getjabatan(), jsonEncode(data)).then((value) {
       if (value['status'].toString().toLowerCase().contains("success")) {
         for (Map<String, dynamic> i in value['data']) {
           listJabatan.add(JabatanModel.fromJson(i));
@@ -125,8 +123,7 @@ class JabatanNotifier extends ChangeNotifier {
     var data = {
       "id": jabatanModel!.id,
     };
-    Setuprepository.setup(token, NetworkURL.deletedJabatan(), jsonEncode(data))
-        .then((value) {
+    Setuprepository.setup(token, NetworkURL.deletedJabatan(), jsonEncode(data)).then((value) {
       Navigator.pop(context);
       if (value['status'].toString().toLowerCase().contains("success")) {
         getLevel();
@@ -171,9 +168,7 @@ class JabatanNotifier extends ChangeNotifier {
           "nama_jabatan": nama.text.trim(),
         };
         print(jsonEncode(data));
-        Setuprepository.setup(
-                token, NetworkURL.updatedJabatan(), jsonEncode(data))
-            .then((value) {
+        Setuprepository.setup(token, NetworkURL.updatedJabatan(), jsonEncode(data)).then((value) {
           Navigator.pop(context);
           if (value['status'].toString().toLowerCase().contains("success")) {
             informationDialog(context, "Information", value['message']);
@@ -193,8 +188,7 @@ class JabatanNotifier extends ChangeNotifier {
           "kode_jabatan": kode.text.trim(),
           "nama_jabatan": nama.text.trim(),
         };
-        Setuprepository.setup(token, NetworkURL.addJabatan(), jsonEncode(data))
-            .then((value) {
+        Setuprepository.setup(token, NetworkURL.addJabatan(), jsonEncode(data)).then((value) {
           Navigator.pop(context);
           if (value['status'].toString().toLowerCase().contains("success")) {
             informationDialog(context, "Information", value['message']);
