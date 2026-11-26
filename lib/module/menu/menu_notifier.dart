@@ -124,21 +124,9 @@ class MenuNotifier extends ChangeNotifier {
       const CoreMenuItem(title: 'Kantor link ke HRIS', routePath: routeKantor, page: 1, icon: 'building', section: 'SETUP'),
       const CoreMenuItem(title: 'Sandi BI', routePath: routeSandi, page: 6, icon: 'sandi', section: 'SETUP'),
       const CoreMenuItem(title: 'GL', routePath: routeGl, page: 2, icon: 'accounting', section: 'SETUP'),
-<<<<<<< HEAD
-      const CoreMenuItem(title: 'SBB RAK', routePath: routeRak, page: 14, icon: 'rak', section: 'SETUP', parentTitle: 'RAK'),
-      const CoreMenuItem(title: 'Rate RAK', routePath: routeRateRak, page: 15, icon: 'rak', section: 'SETUP', parentTitle: 'RAK'),
-=======
-      const CoreMenuItem(title: 'Prod Tabungan', routePath: routeProductTabungan, page: 7, icon: 'saving', section: 'SETUP'),
-      const CoreMenuItem(title: 'Prod Deposito', routePath: routeProductDeposito, page: 8, icon: 'deposito', section: 'SETUP'),
-      const CoreMenuItem(title: 'Format Buku Tab', routePath: routeFormatBuku, page: 9, icon: 'print', section: 'SETUP'),
-      const CoreMenuItem(title: 'Format Cover Buku', routePath: routeFormatCover, page: 10, icon: 'print', section: 'SETUP'),
-      const CoreMenuItem(title: 'Format Bilyet Dep', routePath: routeFormatBilyet, page: 11, icon: 'print', section: 'SETUP'),
-      const CoreMenuItem(title: 'Sandi Trans Buku', routePath: routeSandiTransaksiBuku, page: 12, icon: 'sandi', section: 'SETUP'),
-      const CoreMenuItem(title: 'Agunan', routePath: routeAgunan, page: 13, icon: 'collateral', section: 'SETUP'),
       const CoreMenuItem(title: 'Kategori Agunan', routePath: routeKategoriAgunan, page: 17, icon: 'collateral', section: 'SETUP'),
       const CoreMenuItem(title: 'RAK', routePath: routeRak, page: 14, icon: 'rak', section: 'SETUP'),
       const CoreMenuItem(title: 'Rate RAK', routePath: routeRateRak, page: 15, icon: 'rak', section: 'SETUP'),
->>>>>>> 37f8286717e3d5429ed1e94e101b85a2eb13eade
       const CoreMenuItem(title: 'PPAP', routePath: routePpap, page: 16, icon: 'ppap', section: 'SETUP'),
       const CoreMenuItem(title: 'Pajak Agregat', routePath: routePajakAgregat, page: 17, icon: 'tax', section: 'SETUP'),
       const CoreMenuItem(title: 'Kelompok Pihak Ketiga', routePath: routeKelompokPihakKetiga, page: 25, icon: 'group', section: 'SETUP'),
@@ -148,15 +136,31 @@ class MenuNotifier extends ChangeNotifier {
       const CoreMenuItem(title: 'Account Officer', routePath: routeAo, page: 5, icon: 'ao', section: 'MASTER'),
       const CoreMenuItem(title: 'ABA', routePath: routeAba, page: 20, icon: 'bank', section: 'MASTER'),
       const CoreMenuItem(title: 'Mitra Bisnis', routePath: routeMitraBisnis, page: 21, icon: 'group', section: 'MASTER'),
-      const CoreMenuItem(title: 'Data Inventaris', routePath: routeInventaris, page: 22, icon: 'inventory', section: 'MASTER', parentTitle: 'Inventaris'),
-      const CoreMenuItem(title: 'Penempatan Inventaris', routePath: routePenempatanInventaris, page: 30, icon: 'inventory', section: 'MASTER', parentTitle: 'Inventaris'),
-      const CoreMenuItem(title: 'Revaluasi', routePath: routeRevaluasiInventaris, page: 28, icon: 'inventory', section: 'MASTER', parentTitle: 'Inventaris'),
-      const CoreMenuItem(title: 'Penghapusan Inventaris', routePath: routePenghapusanInventaris, page: 29, icon: 'inventory', section: 'MASTER', parentTitle: 'Inventaris'),
+      const CoreMenuItem(
+          title: 'Data Inventaris', routePath: routeInventaris, page: 22, icon: 'inventory', section: 'MASTER', parentTitle: 'Inventaris'),
+      const CoreMenuItem(
+          title: 'Penempatan Inventaris',
+          routePath: routePenempatanInventaris,
+          page: 30,
+          icon: 'inventory',
+          section: 'MASTER',
+          parentTitle: 'Inventaris'),
+      const CoreMenuItem(
+          title: 'Revaluasi', routePath: routeRevaluasiInventaris, page: 28, icon: 'inventory', section: 'MASTER', parentTitle: 'Inventaris'),
+      const CoreMenuItem(
+          title: 'Penghapusan Inventaris',
+          routePath: routePenghapusanInventaris,
+          page: 29,
+          icon: 'inventory',
+          section: 'MASTER',
+          parentTitle: 'Inventaris'),
       const CoreMenuItem(title: 'Kelompok Aset', routePath: routeKelompokAset, page: 27, icon: 'inventory', section: 'SETUP'),
       const CoreMenuItem(title: 'Target', routePath: routeRabMarketing, page: 23, icon: 'group', section: 'MASTER', parentTitle: 'RAB Marketing'),
-      const CoreMenuItem(title: 'Realisasi', routePath: routeRabMarketingRealisasi, page: 31, icon: 'group', section: 'MASTER', parentTitle: 'RAB Marketing'),
+      const CoreMenuItem(
+          title: 'Realisasi', routePath: routeRabMarketingRealisasi, page: 31, icon: 'group', section: 'MASTER', parentTitle: 'RAB Marketing'),
       const CoreMenuItem(title: 'Target', routePath: routeRabKantor, page: 24, icon: 'building', section: 'MASTER', parentTitle: 'RAB Kantor'),
-      const CoreMenuItem(title: 'Realisasi', routePath: routeRabKantorRealisasi, page: 32, icon: 'building', section: 'MASTER', parentTitle: 'RAB Kantor'),
+      const CoreMenuItem(
+          title: 'Realisasi', routePath: routeRabKantorRealisasi, page: 32, icon: 'building', section: 'MASTER', parentTitle: 'RAB Kantor'),
     ];
 
     if (isSuperAdmin) {
