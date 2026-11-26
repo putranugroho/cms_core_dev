@@ -333,65 +333,73 @@ class _Tabel extends StatelessWidget {
     final cari = value.keyword.text.trim().toLowerCase();
     final bawaan = kategoriBawaan.entries.where((e) => cari.isEmpty || e.value.toLowerCase().contains(cari) || e.key.toLowerCase().contains(cari)).toList();
     if (bawaan.isEmpty && value.list.isEmpty) return const Center(child: Text('Kategori agunan tidak ditemukan.'));
-    return Scrollbar(
-      thumbVisibility: true,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        scrollDirection: Axis.horizontal,
+    // Tabel minimal selebar area konten supaya kolom terbagi sampai kanan;
+    // di layar sempit tetap bisa digeser ke samping.
+    return LayoutBuilder(
+      builder: (context, box) => Scrollbar(
+        thumbVisibility: true,
         child: SingleChildScrollView(
-          child: DataTable(
-            headingRowColor: MaterialStateProperty.all(colorPrimary),
-            headingTextStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            columns: const [
-              DataColumn(label: Text('Kode')),
-              DataColumn(label: Text('Nama Kategori')),
-              DataColumn(label: Text('Jumlah Field'), numeric: true),
-              DataColumn(label: Text('Dibuat')),
-              DataColumn(label: Text('Aksi')),
-            ],
-            rows: [
-              ...bawaan.map((e) => DataRow(
-                    color: MaterialStateProperty.all(const Color(0xFFF3F5F4)),
-                    cells: [
-                      DataCell(Text(e.key, style: const TextStyle(fontWeight: FontWeight.bold))),
-                      DataCell(SizedBox(width: 280, child: Text(e.value, overflow: TextOverflow.ellipsis))),
-                      const DataCell(Text('-')),
-                      const DataCell(Text('-')),
-                      const DataCell(Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.lock_outline, size: 16, color: Colors.black54),
-                          SizedBox(width: 6),
-                          Text('Bawaan', style: TextStyle(color: Colors.black54)),
+          padding: const EdgeInsets.all(20),
+          scrollDirection: Axis.horizontal,
+          child: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minWidth: box.maxWidth - 40),
+              child: DataTable(
+                columnSpacing: 32,
+                headingRowColor: MaterialStateProperty.all(colorPrimary),
+                headingTextStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                columns: const [
+                  DataColumn(label: Text('Kode')),
+                  DataColumn(label: Text('Nama Kategori')),
+                  DataColumn(label: Text('Jumlah Field'), numeric: true),
+                  DataColumn(label: Text('Dibuat')),
+                  DataColumn(label: Text('Aksi')),
+                ],
+                rows: [
+                  ...bawaan.map((e) => DataRow(
+                        color: MaterialStateProperty.all(const Color(0xFFF3F5F4)),
+                        cells: [
+                          DataCell(Text(e.key, style: const TextStyle(fontWeight: FontWeight.bold))),
+                          DataCell(SizedBox(width: 220, child: Text(e.value, overflow: TextOverflow.ellipsis))),
+                          const DataCell(Text('-')),
+                          const DataCell(Text('-')),
+                          const DataCell(Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.lock_outline, size: 16, color: Colors.black54),
+                              SizedBox(width: 6),
+                              Text('Bawaan', style: TextStyle(color: Colors.black54)),
+                            ],
+                          )),
                         ],
                       )),
-                    ],
-                  )),
-              ...value.list.map((row) => DataRow(cells: [
-                    DataCell(Text(row.kode, style: const TextStyle(fontWeight: FontWeight.bold))),
-                    DataCell(SizedBox(width: 280, child: Text(row.nama, overflow: TextOverflow.ellipsis))),
-                    DataCell(Text('${row.jumlahField}')),
-                    DataCell(Text(row.createdAt)),
-                    DataCell(Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (value.canUpdate)
-                          ElevatedButton(
-                            onPressed: () => value.edit(row),
-                            style: ElevatedButton.styleFrom(backgroundColor: colorPrimary),
-                            child: const Text('Edit', style: TextStyle(color: Colors.white)),
-                          ),
-                        if (value.canUpdate && value.canDelete) const SizedBox(width: 8),
-                        if (value.canDelete)
-                          ElevatedButton(
-                            onPressed: () => value.confirmDelete(row),
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                            child: const Text('Hapus', style: TextStyle(color: Colors.white)),
-                          ),
-                      ],
-                    )),
-                  ])),
-            ],
+                  ...value.list.map((row) => DataRow(cells: [
+                        DataCell(Text(row.kode, style: const TextStyle(fontWeight: FontWeight.bold))),
+                        DataCell(SizedBox(width: 220, child: Text(row.nama, overflow: TextOverflow.ellipsis))),
+                        DataCell(Text('${row.jumlahField}')),
+                        DataCell(Text(row.createdAt)),
+                        DataCell(Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (value.canUpdate)
+                              ElevatedButton(
+                                onPressed: () => value.edit(row),
+                                style: ElevatedButton.styleFrom(backgroundColor: colorPrimary),
+                                child: const Text('Edit', style: TextStyle(color: Colors.white)),
+                              ),
+                            if (value.canUpdate && value.canDelete) const SizedBox(width: 8),
+                            if (value.canDelete)
+                              ElevatedButton(
+                                onPressed: () => value.confirmDelete(row),
+                                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                child: const Text('Hapus', style: TextStyle(color: Colors.white)),
+                              ),
+                          ],
+                        )),
+                      ])),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -415,7 +423,7 @@ class _Form extends StatelessWidget {
         color: Colors.black.withOpacity(0.25),
         alignment: Alignment.centerRight,
         child: Container(
-          width: 680,
+          width: 760,
           height: double.infinity,
           color: Colors.white,
           child: SingleChildScrollView(
@@ -459,7 +467,7 @@ class _Form extends StatelessWidget {
                   'Field yang sudah tersimpan tidak dihapus permanen, hanya dinonaktifkan, supaya isian agunan lama tetap di kolom yang sama.',
                   style: TextStyle(color: Colors.black54, fontSize: 12),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 ...value.fields.map((f) => _BarisField(
                       key: ValueKey(f.key),
                       value: value,
@@ -523,21 +531,18 @@ class _BarisField extends StatelessWidget {
       );
     }
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.black12)),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.fromLTRB(16, 20, 12, 18),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.black12)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
-                width: 28,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: Text('${nomor ?? ''}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black54)),
-                ),
+                width: 32,
+                child: Text('${nomor ?? ''}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black54)),
               ),
               Expanded(
                 flex: 3,
@@ -548,7 +553,7 @@ class _BarisField extends StatelessWidget {
                   onChanged: (v) => f.label = v,
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
               Expanded(
                 flex: 2,
                 child: DropdownButtonFormField<String>(
@@ -558,16 +563,13 @@ class _BarisField extends StatelessWidget {
                   onChanged: (v) => value.ubah(() => f.tipe = v ?? 'teks'),
                 ),
               ),
-              const SizedBox(width: 4),
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Checkbox(value: f.wajib, onChanged: (v) => value.ubah(() => f.wajib = v ?? false)),
-                    const Text('Wajib'),
-                  ],
-                ),
+              const SizedBox(width: 8),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Checkbox(value: f.wajib, onChanged: (v) => value.ubah(() => f.wajib = v ?? false)),
+                  const Text('Wajib'),
+                ],
               ),
               IconButton(
                 tooltip: 'Hapus field',
@@ -578,7 +580,7 @@ class _BarisField extends StatelessWidget {
           ),
           if (f.butuhOpsi)
             Padding(
-              padding: const EdgeInsets.only(left: 28, top: 4),
+              padding: const EdgeInsets.only(left: 32, top: 18, right: 4),
               child: TextFormField(
                 key: ValueKey('${f.key}-opsi'),
                 initialValue: f.opsi.join(', '),
