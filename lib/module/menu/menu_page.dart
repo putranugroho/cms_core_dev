@@ -100,6 +100,8 @@ class MenuPage extends StatelessWidget {
         return const SimpleMenuPage(key: ValueKey('holidays'), menu: SimpleMenu.holidays);
       case 25:
         return const PartyGroupPage();
+      case 17:
+        return const KategoriAgunanPage();
       default:
         if (value.menuItems.isEmpty) return const _NoAccessPage();
         return _buildPageByFirst(value.menuItems.first.page);

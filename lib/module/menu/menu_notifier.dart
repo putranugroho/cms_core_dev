@@ -53,6 +53,7 @@ class MenuNotifier extends ChangeNotifier {
   static const String routeFormatBilyet = '/setup/format-bilyet';
   static const String routeSandiTransaksiBuku = '/setup/sandi-transaksi-buku';
   static const String routeAgunan = '/setup/agunan';
+  static const String routeKategoriAgunan = '/setup/request-kategori';
   static const String routeRak = '/setup/rak';
   static const String routeRateRak = '/setup/rak/relasi';
   static const String routePpap = '/setup/bobot-ppap';
@@ -123,8 +124,21 @@ class MenuNotifier extends ChangeNotifier {
       const CoreMenuItem(title: 'Kantor link ke HRIS', routePath: routeKantor, page: 1, icon: 'building', section: 'SETUP'),
       const CoreMenuItem(title: 'Sandi BI', routePath: routeSandi, page: 6, icon: 'sandi', section: 'SETUP'),
       const CoreMenuItem(title: 'GL', routePath: routeGl, page: 2, icon: 'accounting', section: 'SETUP'),
+<<<<<<< HEAD
       const CoreMenuItem(title: 'SBB RAK', routePath: routeRak, page: 14, icon: 'rak', section: 'SETUP', parentTitle: 'RAK'),
       const CoreMenuItem(title: 'Rate RAK', routePath: routeRateRak, page: 15, icon: 'rak', section: 'SETUP', parentTitle: 'RAK'),
+=======
+      const CoreMenuItem(title: 'Prod Tabungan', routePath: routeProductTabungan, page: 7, icon: 'saving', section: 'SETUP'),
+      const CoreMenuItem(title: 'Prod Deposito', routePath: routeProductDeposito, page: 8, icon: 'deposito', section: 'SETUP'),
+      const CoreMenuItem(title: 'Format Buku Tab', routePath: routeFormatBuku, page: 9, icon: 'print', section: 'SETUP'),
+      const CoreMenuItem(title: 'Format Cover Buku', routePath: routeFormatCover, page: 10, icon: 'print', section: 'SETUP'),
+      const CoreMenuItem(title: 'Format Bilyet Dep', routePath: routeFormatBilyet, page: 11, icon: 'print', section: 'SETUP'),
+      const CoreMenuItem(title: 'Sandi Trans Buku', routePath: routeSandiTransaksiBuku, page: 12, icon: 'sandi', section: 'SETUP'),
+      const CoreMenuItem(title: 'Agunan', routePath: routeAgunan, page: 13, icon: 'collateral', section: 'SETUP'),
+      const CoreMenuItem(title: 'Kategori Agunan', routePath: routeKategoriAgunan, page: 17, icon: 'collateral', section: 'SETUP'),
+      const CoreMenuItem(title: 'RAK', routePath: routeRak, page: 14, icon: 'rak', section: 'SETUP'),
+      const CoreMenuItem(title: 'Rate RAK', routePath: routeRateRak, page: 15, icon: 'rak', section: 'SETUP'),
+>>>>>>> 37f8286717e3d5429ed1e94e101b85a2eb13eade
       const CoreMenuItem(title: 'PPAP', routePath: routePpap, page: 16, icon: 'ppap', section: 'SETUP'),
       const CoreMenuItem(title: 'Pajak Agregat', routePath: routePajakAgregat, page: 17, icon: 'tax', section: 'SETUP'),
       const CoreMenuItem(title: 'Kelompok Pihak Ketiga', routePath: routeKelompokPihakKetiga, page: 25, icon: 'group', section: 'SETUP'),
