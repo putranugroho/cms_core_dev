@@ -1,6 +1,8 @@
 import 'package:cms_core/models/index.dart';
 import 'package:cms_core/module/menu/menu_notifier.dart';
+import 'package:cms_core/module/setup/kategori_agunan/kategori_agunan_page.dart';
 import 'package:cms_core/pref/pref.dart';
+import 'package:cms_core/repository/kategori_agunan_repository.dart';
 import 'package:cms_core/repository/lending_setup_repository.dart';
 import 'package:cms_core/repository/saving_product_repository.dart';
 import 'package:cms_core/utils/colors.dart';
@@ -27,13 +29,13 @@ class AgunanPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _HeaderBar(
-                      title: 'Agunan',
-                      subtitle: 'Master jenis agunan untuk pinjaman',
+                      title: 'Sandi BI Agunan',
+                      subtitle: 'Sandi BI agunan per kategori, dipakai form agunan CSO',
                       keyword: value.keyword,
-                      hint: 'Cari kode / keterangan',
+                      hint: 'Cari sandi / keterangan',
                       onSearch: value.getList,
                       onAdd: value.canCreate ? value.tambah : null,
-                      addText: 'Tambah Agunan',
+                      addText: 'Tambah Sandi',
                     ),
                     Expanded(
                       child: value.isLoading
@@ -277,6 +279,10 @@ class AgunanNotifier extends ChangeNotifier {
   final kodeAgunan = TextEditingController();
   final keterangan = TextEditingController();
   final bobotPengurang = TextEditingController();
+  String? kategori;
+
+  // Pilihan kategori: 4 bawaan + kategori custom (kode -> nama).
+  Map<String, String> opsiKategori = Map.of(kategoriBawaan);
 
   List<AgunanSetupModel> list = [];
   AgunanSetupModel? selected;
@@ -291,8 +297,20 @@ class AgunanNotifier extends ChangeNotifier {
 
   Future<void> init() async {
     await _loadAccess(MenuNotifier.routeAgunan);
+    await _loadKategori();
     await getList();
   }
+
+  Future<void> _loadKategori() async {
+    try {
+      final custom = await KategoriAgunanRepository.list();
+      opsiKategori = {...kategoriBawaan, for (final k in custom) k.kode: k.nama};
+    } catch (_) {
+      opsiKategori = Map.of(kategoriBawaan);
+    }
+  }
+
+  String namaKategori(String kode) => kode.isEmpty ? '-' : (opsiKategori[kode] ?? kode);
 
   Future<void> _loadAccess(String route) async {
     final pref = Pref();
@@ -325,6 +343,11 @@ class AgunanNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  void pilihKategori(String? v) {
+    kategori = v;
+    notifyListeners();
+  }
+
   void tambah() {
     clear();
     dialog = true;
@@ -342,11 +365,12 @@ class AgunanNotifier extends ChangeNotifier {
     kodeAgunan.clear();
     keterangan.clear();
     bobotPengurang.clear();
+    kategori = null;
   }
 
   Future<void> edit(AgunanSetupModel value) async {
     if (!canUpdate) {
-      informationDialog(context, 'Akses Ditolak', 'Anda tidak memiliki akses update agunan.');
+      informationDialog(context, 'Akses Ditolak', 'Anda tidak memiliki akses update sandi BI agunan.');
       return;
     }
     try {
@@ -362,6 +386,8 @@ class AgunanNotifier extends ChangeNotifier {
     kodeAgunan.text = selected?.kodeAgunan ?? value.kodeAgunan;
     keterangan.text = selected?.keterangan ?? value.keterangan;
     bobotPengurang.text = _numText(selected?.bobotPengurang ?? value.bobotPengurang);
+    final k = selected?.kategori ?? value.kategori;
+    kategori = k.isEmpty ? null : k;
     notifyListeners();
   }
 
@@ -369,8 +395,8 @@ class AgunanNotifier extends ChangeNotifier {
     final kode = kodeAgunan.text.trim().toUpperCase();
     final ket = keterangan.text.trim();
     final bobot = double.tryParse(bobotPengurang.text.trim().replaceAll(',', '.'));
-    if (kode.isEmpty || ket.isEmpty || bobot == null) {
-      informationDialog(context, 'Validasi', 'Kode agunan, keterangan, dan bobot pengurang wajib diisi.');
+    if (kategori == null || kode.isEmpty || ket.isEmpty || bobot == null) {
+      informationDialog(context, 'Validasi', 'Kategori, sandi BI, keterangan, dan bobot pengurang wajib diisi.');
       return;
     }
     if (bobot < 0 || bobot > 100) {
@@ -383,9 +409,10 @@ class AgunanNotifier extends ChangeNotifier {
         'kode_agunan': kode,
         'keterangan': ket,
         'bobot_pengurang': bobot,
+        'kategori': kategori,
       });
       if (context.mounted) Navigator.pop(context);
-      informationDialog(context, 'Informasi', editData ? 'Agunan berhasil diupdate.' : 'Agunan berhasil ditambahkan.');
+      informationDialog(context, 'Informasi', editData ? 'Sandi BI agunan berhasil diupdate.' : 'Sandi BI agunan berhasil ditambahkan.');
       dialog = false;
       clear();
       await getList();
@@ -397,14 +424,14 @@ class AgunanNotifier extends ChangeNotifier {
 
   void confirmDelete(AgunanSetupModel value) {
     if (!canDelete) {
-      informationDialog(context, 'Akses Ditolak', 'Anda tidak memiliki akses hapus agunan.');
+      informationDialog(context, 'Akses Ditolak', 'Anda tidak memiliki akses hapus sandi BI agunan.');
       return;
     }
     showDialog(
         context: context,
         builder: (_) => AlertDialog(
               title: const Text('Konfirmasi'),
-              content: Text('Hapus agunan ${value.kodeAgunan} - ${value.keterangan}?'),
+              content: Text('Hapus sandi BI agunan ${value.kodeAgunan} - ${value.keterangan}?'),
               actions: [
                 TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
                 ElevatedButton(
@@ -422,7 +449,7 @@ class AgunanNotifier extends ChangeNotifier {
     try {
       await LendingSetupRepository.deleteAgunan(value.kodeAgunan);
       if (context.mounted) Navigator.pop(context);
-      informationDialog(context, 'Informasi', 'Agunan berhasil dihapus.');
+      informationDialog(context, 'Informasi', 'Sandi BI agunan berhasil dihapus.');
       await getList();
     } catch (e) {
       if (context.mounted) Navigator.pop(context);
@@ -1159,14 +1186,15 @@ class _AgunanTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (value.list.isEmpty) return const Center(child: Text('Data agunan belum tersedia.'));
+    if (value.list.isEmpty) return const Center(child: Text('Sandi BI agunan belum tersedia.'));
     return _TableShell(
       child: DataTable(
         headingRowColor: MaterialStateProperty.all(colorPrimary),
         headingTextStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         columns: const [
-          DataColumn(label: Text('Kode Agunan')),
+          DataColumn(label: Text('Sandi BI')),
           DataColumn(label: Text('Keterangan')),
+          DataColumn(label: Text('Kategori')),
           DataColumn(label: Text('Bobot Pengurang')),
           DataColumn(label: Text('Status')),
           DataColumn(label: Text('Aksi')),
@@ -1175,6 +1203,7 @@ class _AgunanTable extends StatelessWidget {
             .map((row) => DataRow(cells: [
                   DataCell(Text(row.kodeAgunan, style: const TextStyle(fontWeight: FontWeight.bold))),
                   DataCell(SizedBox(width: 320, child: Text(row.keterangan, overflow: TextOverflow.ellipsis))),
+                  DataCell(Text(value.namaKategori(row.kategori))),
                   DataCell(Text(_numText(row.bobotPengurang))),
                   DataCell(_StatusChip(code: row.statusData)),
                   DataCell(_ActionButtons(
@@ -1285,10 +1314,21 @@ class _AgunanForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _SideDialog(
-      title: value.editData ? 'Edit Agunan' : 'Tambah Agunan',
+      title: value.editData ? 'Edit Sandi BI Agunan' : 'Tambah Sandi BI Agunan',
       onClose: value.tutup,
       children: [
-        _textField('Kode Agunan', value.kodeAgunan,
+        DropdownButtonFormField<String>(
+          value: value.kategori,
+          decoration: _decoration('Kategori *'),
+          items: [
+            if (value.kategori != null && !value.opsiKategori.containsKey(value.kategori))
+              DropdownMenuItem(value: value.kategori, child: Text(value.kategori!)),
+            ...value.opsiKategori.entries.map((e) => DropdownMenuItem(value: e.key, child: Text(e.value))),
+          ],
+          onChanged: value.pilihKategori,
+        ),
+        const SizedBox(height: 12),
+        _textField('Sandi BI', value.kodeAgunan,
             required: true, readOnly: value.editData, maxLength: 40, inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9_\-]'))]),
         _textField('Keterangan', value.keterangan, required: true, maxLength: 200),
         _textField('Bobot Pengurang', value.bobotPengurang,

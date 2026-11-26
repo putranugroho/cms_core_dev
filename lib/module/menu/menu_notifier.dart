@@ -110,25 +110,28 @@ class MenuNotifier extends ChangeNotifier {
 
   void _buildMenuItems() {
     final all = <CoreMenuItem>[
+      // SETUP: dasar (kantor, GL, sandi, kalender), lalu per produk
+      // (tabungan, deposito, kredit & agunan), lalu lainnya.
+      const CoreMenuItem(title: 'Kantor link ke HRIS', routePath: routeKantor, page: 1, icon: 'building', section: 'SETUP'),
+      const CoreMenuItem(title: 'GL', routePath: routeGl, page: 2, icon: 'accounting', section: 'SETUP'),
+      const CoreMenuItem(title: 'Sandi BI', routePath: routeSandi, page: 6, icon: 'sandi', section: 'SETUP'),
+      const CoreMenuItem(title: 'Jam Operasional', routePath: '/setup/jam-operasional', page: 33, icon: 'clock', section: 'SETUP'),
+      const CoreMenuItem(title: 'Hari Libur', routePath: '/setup/hari-libur', page: 34, icon: 'calendar-x', section: 'SETUP'),
       const CoreMenuItem(title: 'Prod Tabungan', routePath: routeProductTabungan, page: 7, icon: 'saving', section: 'SETUP'),
-      const CoreMenuItem(title: 'Format Cover Buku', routePath: routeFormatCover, page: 10, icon: 'print', section: 'SETUP'),
       const CoreMenuItem(title: 'Format Buku Tab', routePath: routeFormatBuku, page: 9, icon: 'print', section: 'SETUP'),
+      const CoreMenuItem(title: 'Format Cover Buku', routePath: routeFormatCover, page: 10, icon: 'print', section: 'SETUP'),
       const CoreMenuItem(title: 'Sandi Trans Buku', routePath: routeSandiTransaksiBuku, page: 12, icon: 'sandi', section: 'SETUP'),
       const CoreMenuItem(title: 'Prod Deposito', routePath: routeProductDeposito, page: 8, icon: 'deposito', section: 'SETUP'),
       const CoreMenuItem(title: 'Format Bilyet Dep', routePath: routeFormatBilyet, page: 11, icon: 'print', section: 'SETUP'),
       const CoreMenuItem(title: 'Prod Kredit', routePath: routeProductKredit, page: 18, icon: 'loan', section: 'SETUP'),
-      const CoreMenuItem(title: 'Agunan', routePath: routeAgunan, page: 13, icon: 'collateral', section: 'SETUP'),
-      const CoreMenuItem(title: 'Jam Operasional', routePath: '/setup/jam-operasional', page: 33, icon: 'clock', section: 'SETUP'),
-      const CoreMenuItem(title: 'Hari Libur', routePath: '/setup/hari-libur', page: 34, icon: 'calendar-x', section: 'SETUP'),
-      const CoreMenuItem(title: 'Jenis Inventaris', routePath: routeSetupInventaris, page: 19, icon: 'inventory', section: 'SETUP'),
-      const CoreMenuItem(title: 'Kantor link ke HRIS', routePath: routeKantor, page: 1, icon: 'building', section: 'SETUP'),
-      const CoreMenuItem(title: 'Sandi BI', routePath: routeSandi, page: 6, icon: 'sandi', section: 'SETUP'),
-      const CoreMenuItem(title: 'GL', routePath: routeGl, page: 2, icon: 'accounting', section: 'SETUP'),
       const CoreMenuItem(title: 'Kategori Agunan', routePath: routeKategoriAgunan, page: 35, icon: 'collateral', section: 'SETUP'),
+      const CoreMenuItem(title: 'Sandi BI Agunan', routePath: routeAgunan, page: 13, icon: 'collateral', section: 'SETUP'),
+      const CoreMenuItem(title: 'PPAP', routePath: routePpap, page: 16, icon: 'ppap', section: 'SETUP'),
       const CoreMenuItem(title: 'RAK', routePath: routeRak, page: 14, icon: 'rak', section: 'SETUP'),
       const CoreMenuItem(title: 'Rate RAK', routePath: routeRateRak, page: 15, icon: 'rak', section: 'SETUP'),
-      const CoreMenuItem(title: 'PPAP', routePath: routePpap, page: 16, icon: 'ppap', section: 'SETUP'),
       const CoreMenuItem(title: 'Pajak Agregat', routePath: routePajakAgregat, page: 17, icon: 'tax', section: 'SETUP'),
+      const CoreMenuItem(title: 'Jenis Inventaris', routePath: routeSetupInventaris, page: 19, icon: 'inventory', section: 'SETUP'),
+      const CoreMenuItem(title: 'Kelompok Aset', routePath: routeKelompokAset, page: 27, icon: 'inventory', section: 'SETUP'),
       const CoreMenuItem(title: 'Kelompok Pihak Ketiga', routePath: routeKelompokPihakKetiga, page: 25, icon: 'group', section: 'SETUP'),
       const CoreMenuItem(title: 'Login User', routePath: routeUsers, page: 3, icon: 'group', section: 'MASTER', parentTitle: 'User Login & Akses'),
       const CoreMenuItem(
@@ -154,7 +157,6 @@ class MenuNotifier extends ChangeNotifier {
           icon: 'inventory',
           section: 'MASTER',
           parentTitle: 'Inventaris'),
-      const CoreMenuItem(title: 'Kelompok Aset', routePath: routeKelompokAset, page: 27, icon: 'inventory', section: 'SETUP'),
       const CoreMenuItem(title: 'Target', routePath: routeRabMarketing, page: 23, icon: 'group', section: 'MASTER', parentTitle: 'RAB Marketing'),
       const CoreMenuItem(
           title: 'Realisasi', routePath: routeRabMarketingRealisasi, page: 31, icon: 'group', section: 'MASTER', parentTitle: 'RAB Marketing'),

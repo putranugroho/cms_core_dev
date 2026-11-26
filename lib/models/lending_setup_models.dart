@@ -32,6 +32,7 @@ class AgunanSetupModel {
   final String kodeAgunan;
   final String keterangan;
   final double bobotPengurang;
+  final String kategori;
   final String statusData;
   final String createdAt;
   final String createdBy;
@@ -43,6 +44,7 @@ class AgunanSetupModel {
     required this.kodeAgunan,
     required this.keterangan,
     required this.bobotPengurang,
+    this.kategori = '',
     required this.statusData,
     required this.createdAt,
     required this.createdBy,
@@ -55,6 +57,7 @@ class AgunanSetupModel {
         kodeAgunan: LendingValue.text(json['kode_agunan']),
         keterangan: LendingValue.text(json['keterangan']),
         bobotPengurang: LendingValue.toDouble(json['bobot_pengurang']),
+        kategori: LendingValue.text(json['kategori']),
         statusData: LendingValue.text(json['status_data']),
         createdAt: LendingValue.text(json['created_at']),
         createdBy: LendingValue.text(json['created_by']),
