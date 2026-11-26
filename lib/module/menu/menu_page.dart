@@ -23,6 +23,7 @@ import 'package:cms_core/module/master/new_master/new_master_pages.dart' hide Ab
 import 'package:cms_core/module/master/aba/aba_page.dart';
 import 'package:cms_core/module/setup/third_party/third_party_pages.dart';
 import 'package:cms_core/module/master/rab/rab_page.dart';
+import 'package:cms_core/module/setup/kategori_agunan/kategori_agunan_page.dart';
 import 'package:cms_core/utils/auto_logout_wrapper.dart';
 import 'package:cms_core/utils/colors.dart';
 import 'package:cms_core/utils/images_path.dart';
@@ -100,7 +101,7 @@ class MenuPage extends StatelessWidget {
         return const SimpleMenuPage(key: ValueKey('holidays'), menu: SimpleMenu.holidays);
       case 25:
         return const PartyGroupPage();
-      case 17:
+      case 35:
         return const KategoriAgunanPage();
       default:
         if (value.menuItems.isEmpty) return const _NoAccessPage();
@@ -176,6 +177,8 @@ class MenuPage extends StatelessWidget {
         return const SimpleMenuPage(key: ValueKey('holidays'), menu: SimpleMenu.holidays);
       case 25:
         return const PartyGroupPage();
+      case 35:
+        return const KategoriAgunanPage();
       default:
         return const _NoAccessPage();
     }

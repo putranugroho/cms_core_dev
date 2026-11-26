@@ -124,7 +124,7 @@ class MenuNotifier extends ChangeNotifier {
       const CoreMenuItem(title: 'Kantor link ke HRIS', routePath: routeKantor, page: 1, icon: 'building', section: 'SETUP'),
       const CoreMenuItem(title: 'Sandi BI', routePath: routeSandi, page: 6, icon: 'sandi', section: 'SETUP'),
       const CoreMenuItem(title: 'GL', routePath: routeGl, page: 2, icon: 'accounting', section: 'SETUP'),
-      const CoreMenuItem(title: 'Kategori Agunan', routePath: routeKategoriAgunan, page: 17, icon: 'collateral', section: 'SETUP'),
+      const CoreMenuItem(title: 'Kategori Agunan', routePath: routeKategoriAgunan, page: 35, icon: 'collateral', section: 'SETUP'),
       const CoreMenuItem(title: 'RAK', routePath: routeRak, page: 14, icon: 'rak', section: 'SETUP'),
       const CoreMenuItem(title: 'Rate RAK', routePath: routeRateRak, page: 15, icon: 'rak', section: 'SETUP'),
       const CoreMenuItem(title: 'PPAP', routePath: routePpap, page: 16, icon: 'ppap', section: 'SETUP'),

@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:accounting_kantor_gl_useraccess/network/network.dart';
-import 'package:accounting_kantor_gl_useraccess/repository/SetupRepository.dart';
-import 'package:accounting_kantor_gl_useraccess/repository/lending_setup_repository.dart';
+import 'package:cms_core/network/network.dart';
+import 'package:cms_core/repository/SetupRepository.dart';
+import 'package:cms_core/repository/lending_setup_repository.dart';
 
 /// Tipe isian yang dikenal form agunan (CSR frontend, lib/kategori-custom.ts).
 const List<String> tipeFieldKategori = ['teks', 'angka', 'nominal', 'tanggal', 'dropdown', 'checkbox'];

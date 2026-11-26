@@ -1,12 +1,12 @@
 import 'dart:math';
 
-import 'package:accounting_kantor_gl_useraccess/models/index.dart';
-import 'package:accounting_kantor_gl_useraccess/module/menu/menu_notifier.dart';
-import 'package:accounting_kantor_gl_useraccess/pref/pref.dart';
-import 'package:accounting_kantor_gl_useraccess/repository/kategori_agunan_repository.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/colors.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/dialog_loading.dart';
-import 'package:accounting_kantor_gl_useraccess/utils/informationdialog.dart';
+import 'package:cms_core/models/index.dart';
+import 'package:cms_core/module/menu/menu_notifier.dart';
+import 'package:cms_core/pref/pref.dart';
+import 'package:cms_core/repository/kategori_agunan_repository.dart';
+import 'package:cms_core/utils/colors.dart';
+import 'package:cms_core/utils/dialog_loading.dart';
+import 'package:cms_core/utils/informationdialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
