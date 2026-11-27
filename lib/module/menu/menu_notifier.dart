@@ -132,7 +132,7 @@ class MenuNotifier extends ChangeNotifier {
       const CoreMenuItem(title: 'Pajak Agregat', routePath: routePajakAgregat, page: 17, icon: 'tax', section: 'SETUP'),
       const CoreMenuItem(title: 'Jenis Inventaris', routePath: routeSetupInventaris, page: 19, icon: 'inventory', section: 'SETUP'),
       const CoreMenuItem(title: 'Kelompok Aset', routePath: routeKelompokAset, page: 27, icon: 'inventory', section: 'SETUP'),
-      const CoreMenuItem(title: 'Kelompok Pihak Ketiga', routePath: routeKelompokPihakKetiga, page: 25, icon: 'group', section: 'SETUP'),
+      const CoreMenuItem(title: 'Kelompok Mitra', routePath: routeKelompokPihakKetiga, page: 25, icon: 'group', section: 'SETUP'),
       const CoreMenuItem(title: 'Login User', routePath: routeUsers, page: 3, icon: 'group', section: 'MASTER', parentTitle: 'User Login & Akses'),
       const CoreMenuItem(
           title: 'User Access', routePath: routeUserAccess, page: 4, icon: 'user', section: 'MASTER', parentTitle: 'User Login & Akses'),

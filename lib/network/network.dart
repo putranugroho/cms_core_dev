@@ -890,6 +890,9 @@ class NetworkURL {
     return "$url/setup/loan/delete";
   }
 
+  // Template SPK per produk kredit: list, detail, create, update, delete.
+  static String setupLoanSpkTemplate(String action) => "$url/setup/loan/spk-template/$action";
+
 
   static String setupInventarisList() {
     return "$url/setup/inventaris/list";
@@ -932,7 +935,8 @@ class NetworkURL {
   }
 
   static String thirdPartyCapabilities() => "$url/core/third-party/capabilities";
-  static String partyGroupEndpoint(String action) => "$url/setup/kelompok-pihak-ketiga/$action";
+  // Kelompok Mitra (master-service): kode, nama, SBB fee mitra.
+  static String partyGroupEndpoint(String action) => "$url/master/kelompok-mitra/$action";
   static String thirdPartyEndpoint(String action) => "$url/setup/data-pihak-ketiga/$action";
 
   static String masterInventarisList() {

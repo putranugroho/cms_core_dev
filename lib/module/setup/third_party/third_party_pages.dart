@@ -14,7 +14,7 @@ class PartyGroupPage extends StatefulWidget {
 class _PartyGroupPageState
     extends BankingListState<PartyGroupModel, PartyGroupPage> {
   @override
-  String get title => 'Kelompok Pihak Ketiga';
+  String get title => 'Kelompok Mitra';
   @override
   String get route => MenuNotifier.routeKelompokPihakKetiga;
   @override
@@ -23,8 +23,7 @@ class _PartyGroupPageState
     'kode_kelompok': 'Kode Kelompok',
   };
   @override
-  Future<bool> serviceAvailable() =>
-      BankingSetupRepository.partyAvailable(group: true);
+  Future<bool> serviceAvailable() => Future.value(true);
   @override
   Future<BankingPage<PartyGroupModel>> fetchPage() =>
       BankingSetupRepository.groupList(
@@ -48,7 +47,7 @@ class _PartyGroupPageState
       ),
     );
     if (saved == true && mounted) {
-      bankingMessage(context, 'Kelompok pihak ketiga berhasil disimpan.');
+      bankingMessage(context, 'Kelompok mitra berhasil disimpan.');
       await reload();
     }
   }
@@ -61,7 +60,7 @@ class _PartyGroupPageState
       return;
     await BankingSetupRepository.groupDelete(row.kode);
     if (mounted) {
-      bankingMessage(context, 'Kelompok pihak ketiga berhasil dihapus.');
+      bankingMessage(context, 'Kelompok mitra berhasil dihapus.');
       await reload();
     }
   }
@@ -149,6 +148,7 @@ class _PartyGroupFormState extends State<_PartyGroupForm> {
       'kode_kelompok': _code.text,
       'nama_kelompok': _name.text,
       'nomor_sbb': _sbb.text,
+      'nama_sbb': _sbbName.text,
     });
     setState(() {
       _busy = true;
@@ -176,10 +176,10 @@ class _PartyGroupFormState extends State<_PartyGroupForm> {
   Widget build(BuildContext context) => BankingFormDialog(
     error: _error,
     title: widget.readOnly
-        ? 'Detail Kelompok Pihak Ketiga'
+        ? 'Detail Kelompok Mitra'
         : widget.original == null
-        ? 'Tambah Kelompok Pihak Ketiga'
-        : 'Edit Kelompok Pihak Ketiga',
+        ? 'Tambah Kelompok Mitra'
+        : 'Edit Kelompok Mitra',
     formKey: _formKey,
     onSave: _save,
     busy: _busy,
@@ -212,7 +212,7 @@ class _PartyGroupFormState extends State<_PartyGroupForm> {
         _sbb,
         readOnly: widget.readOnly,
         search: widget.readOnly ? null : _pickSbb,
-        helper: 'Opsional',
+        helper: 'SBB fee mitra di data kredit. Opsional.',
         clear: widget.readOnly
             ? null
             : () => setState(() {
@@ -268,7 +268,7 @@ class _MitraBisnisFormPageState
       ),
     );
     if (saved == true && mounted) {
-      bankingMessage(context, 'Data pihak ketiga berhasil disimpan.');
+      bankingMessage(context, 'Mitra bisnis berhasil disimpan.');
       await reload();
     }
   }
@@ -281,7 +281,7 @@ class _MitraBisnisFormPageState
       return;
     await BankingSetupRepository.partyDelete(row.kode);
     if (mounted) {
-      bankingMessage(context, 'Data pihak ketiga berhasil dihapus.');
+      bankingMessage(context, 'Mitra bisnis berhasil dihapus.');
       await reload();
     }
   }
@@ -465,16 +465,15 @@ class _ThirdPartyFormState extends State<_ThirdPartyForm> {
         required: !widget.readOnly,
         readOnly: widget.readOnly || widget.original != null,
       ),
+      // Kelompok wajib dipilih dari Kelompok Mitra; SBB fee mitra di data
+      // kredit diambil dari kelompok ini.
       bankingField(
-        'Kelompok',
+        'Kelompok Mitra',
         _field('kode_kelompok'),
         required: !widget.readOnly,
-        readOnly: widget.readOnly,
-        helper: 'Kode kelompok atau kelompok Mitra Bisnis yang sudah digunakan.',
-      ),
-      if (!widget.readOnly) TextButton.icon(
-        onPressed: _group, icon: const Icon(Icons.search),
-        label: const Text('Pilih Kelompok'),
+        readOnly: true,
+        search: widget.readOnly ? null : _group,
+        helper: widget.readOnly ? null : 'Pilih dari menu Kelompok Mitra.',
       ),
       bankingField('Nama Kelompok', _field('nama_kelompok'), readOnly: true),
       _text('Nama Perusahaan', 'nama_perusahaan', required: true),

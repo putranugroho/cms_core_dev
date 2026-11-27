@@ -112,7 +112,7 @@ Map<String, dynamic> abaFormPayload({
 };
 
 Map<String, dynamic> partyGroupFormPayload(Map<String, String> fields) => {
-  for (final key in ['kode_kelompok', 'nama_kelompok', 'nomor_sbb'])
+  for (final key in ['kode_kelompok', 'nama_kelompok', 'nomor_sbb', 'nama_sbb'])
     key: (fields[key] ?? '').trim(),
 };
 

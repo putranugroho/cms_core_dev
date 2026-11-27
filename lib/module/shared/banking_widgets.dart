@@ -792,7 +792,7 @@ Future<PartyGroupModel?> pickBankingPartyGroup(BuildContext context) =>
     showDialog<PartyGroupModel>(
       context: context,
       builder: (_) => BankingLookupDialog<PartyGroupModel>(
-        title: 'Cari Kelompok Pihak Ketiga',
+        title: 'Cari Kelompok Mitra',
         load: (q, page) => BankingSetupRepository.groupList(
           keyword: q,
           searchField: RegExp(r'^[0-9]{2}$').hasMatch(q)
