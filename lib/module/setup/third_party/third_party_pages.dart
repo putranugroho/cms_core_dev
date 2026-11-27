@@ -218,7 +218,7 @@ class _MitraBisnisFormPageState extends BankingListState<ThirdPartyModel, MitraB
   String get route => MenuNotifier.routeMitraBisnis;
   @override
   Map<String, String> get searchChoices => const {
-        'nama_perusahaan': 'Nama Perusahaan',
+        'nama_perusahaan': 'Nama Mitra',
         'kode_pihak_ketiga': 'Kode Mitra',
       };
   @override
@@ -263,7 +263,7 @@ class _MitraBisnisFormPageState extends BankingListState<ThirdPartyModel, MitraB
           'Kode',
           'Jenis',
           'Kelompok Mitra',
-          'Nama Perusahaan',
+          'Nama Mitra',
           'Kota',
           'No Telp',
           'Bank',
@@ -450,6 +450,14 @@ class _ThirdPartyFormState extends State<_ThirdPartyForm> {
         fields: [
           _section('Mitra', [
             bankingField(
+              'Kelompok Mitra',
+              _field('kode_kelompok'),
+              required: !widget.readOnly,
+              readOnly: true,
+              search: widget.readOnly ? null : _group,
+            ),
+            bankingField('Nama Kelompok', _field('nama_kelompok'), readOnly: true),
+            bankingField(
               'Kode Mitra',
               _field('kode_pihak_ketiga'),
               required: !widget.readOnly,
@@ -460,7 +468,8 @@ class _ThirdPartyFormState extends State<_ThirdPartyForm> {
             Padding(
               padding: const EdgeInsets.only(bottom: 14),
               child: DropdownButtonFormField<String>(
-                initialValue: jenisKelompokMitra.containsKey(_field('jenis_kelompok').text) ? _field('jenis_kelompok').text : null,
+                isExpanded: true,
+                value: jenisKelompokMitra.containsKey(_field('jenis_kelompok').text) ? _field('jenis_kelompok').text : null,
                 decoration: InputDecoration(
                   labelText: widget.readOnly ? 'Jenis Kelompok' : 'Jenis Kelompok *',
                   border: const OutlineInputBorder(),
@@ -470,16 +479,7 @@ class _ThirdPartyFormState extends State<_ThirdPartyForm> {
                 validator: widget.readOnly ? null : (v) => (v == null || v.isEmpty) ? 'Pilih jenis kelompok' : null,
               ),
             ),
-            bankingField(
-              'Kelompok Mitra',
-              _field('kode_kelompok'),
-              required: !widget.readOnly,
-              readOnly: true,
-              search: widget.readOnly ? null : _group,
-              helper: widget.readOnly ? null : 'Pilih dari menu Kelompok Mitra.',
-            ),
-            bankingField('Nama Kelompok', _field('nama_kelompok'), readOnly: true),
-            _text('Nama Perusahaan', 'nama_perusahaan', required: true),
+            _text('Nama Mitra', 'nama_perusahaan', required: true),
           ]),
           _section('Lokasi Mitra', [
             _text('Alamat', 'alamat', required: true),
