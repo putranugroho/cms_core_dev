@@ -1,3 +1,4 @@
+import 'package:cms_core/module/master/inventaris_operations/inventory_form_layout.dart';
 import 'package:cms_core/models/banking_setup_models.dart';
 import 'package:cms_core/module/menu/menu_notifier.dart';
 import 'package:cms_core/module/shared/banking_widgets.dart';
@@ -437,16 +438,42 @@ class _ThirdPartyFormState extends State<_ThirdPartyForm> {
   );
   Widget _phone(String label, String key) =>
       _text(label, key, keyboard: TextInputType.phone);
-  Widget _heading(String text) => Padding(
-    padding: const EdgeInsets.only(top: 8, bottom: 16),
-    child: Text(
-      text,
-      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+  Widget _section(String title, List<Widget> fields) => Container(
+    margin: const EdgeInsets.only(bottom: 20),
+    padding: const EdgeInsets.all(20),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      border: Border.all(color: const Color(0xFFE0E0E0)),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+      const SizedBox(height: 20),
+      Theme(
+        data: Theme.of(context).copyWith(
+          inputDecorationTheme: Theme.of(context).inputDecorationTheme.copyWith(
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+            constraints: const BoxConstraints(minHeight: 56),
+            suffixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 56),
+          ),
+        ),
+        child: InventoryFormGrid(maxColumns: 2, children: fields),
+      ),
+    ]),
+  );
+
+  Widget _picHeading(String title) => InventoryFullWidth(
+    child: Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
     ),
   );
 
   @override
   Widget build(BuildContext context) => BankingFormDialog(
+    width: 1120,
+    sidePanel: true,
     error: _error,
     title: widget.readOnly
         ? 'Detail Mitra Bisnis'
@@ -459,6 +486,7 @@ class _ThirdPartyFormState extends State<_ThirdPartyForm> {
     available: widget.available,
     readOnly: widget.readOnly,
     fields: [
+      _section('Mitra', [
       bankingField(
         'Kode Mitra',
         _field('kode_pihak_ketiga'),
@@ -470,15 +498,13 @@ class _ThirdPartyFormState extends State<_ThirdPartyForm> {
         _field('kode_kelompok'),
         required: !widget.readOnly,
         readOnly: widget.readOnly,
-        helper: 'Kode kelompok atau kelompok Mitra Bisnis yang sudah digunakan.',
-      ),
-      if (!widget.readOnly) TextButton.icon(
-        onPressed: _group, icon: const Icon(Icons.search),
-        label: const Text('Pilih Kelompok'),
+        search: widget.readOnly ? null : _group,
       ),
       bankingField('Nama Kelompok', _field('nama_kelompok'), readOnly: true),
       _text('Nama Perusahaan', 'nama_perusahaan', required: true),
-      _text('Alamat', 'alamat', lines: 2, required: true),
+      ]),
+      _section('Lokasi Mitra', [
+      _text('Alamat', 'alamat', required: true),
       _text('Kelurahan', 'kelurahan'),
       _text('Kecamatan', 'kecamatan'),
       _text('Kota', 'kota', required: true),
@@ -496,6 +522,8 @@ class _ThirdPartyFormState extends State<_ThirdPartyForm> {
             ? (_) => null
             : (v) => (v ?? '').isEmpty ? null : validateBankingCode(v, 5),
       ),
+      ]),
+      _section('Data Mitra', [
       _text('NPWP', 'npwp'),
       _phone('No Telp', 'no_telp'),
       _email('Email', 'email'),
@@ -520,16 +548,19 @@ class _ThirdPartyFormState extends State<_ThirdPartyForm> {
       ),
       bankingField('Nama Bank', _field('nama_bank'), readOnly: true),
       _text('No Rekening', 'nomor_rekening'),
-      _heading('PIC 1'),
+      ]),
+      _section('PIC', [
+      _picHeading('PIC 1'),
       _text('Nama PIC 1', 'nama_pic_1', required: true),
       _text('Jabatan 1', 'jabatan_1'),
       _phone('No HP 1', 'no_hp_1'),
       _email('Email 1', 'email_1'),
-      _heading('PIC 2'),
+      _picHeading('PIC 2'),
       _text('Nama PIC 2', 'nama_pic_2'),
       _text('Jabatan 2', 'jabatan_2'),
       _phone('No HP 2', 'no_hp_2'),
       _email('Email 2', 'email_2'),
+      ]),
     ],
   );
 }

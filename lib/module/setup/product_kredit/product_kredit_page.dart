@@ -664,13 +664,7 @@ class _ProductKreditPageState extends State<ProductKreditPage> {
             _integer('Jangka Waktu Min (Bln)', 'jangka_waktu_min', required: true),
             _integer('Jangka Waktu Max (Bln)', 'jangka_waktu_max', required: true),
             _switch('Agunan', _agunan, (v) => setState(() => _agunan = v)),
-            _switch(
-                'Back To Back',
-                _backToBack,
-                (v) => setState(() {
-                      _backToBack = v;
-                      if (!v) c('spread').clear();
-                    })),
+            const SizedBox(height: 16),
             _decimal('Spread', 'spread', enabled: _backToBack),
             const SizedBox(height: 16),
             _switch(
