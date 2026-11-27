@@ -83,6 +83,36 @@ class LoanProductRepository {
     if (!isSuccess(value)) throw Exception(message(value, 'Gagal menghapus produk kredit'));
   }
 
+  static Future<List<Map<String, dynamic>>> spkTemplateList(String kodeProduk) async {
+    final value = await Setuprepository.fetch(NetworkURL.setupLoanSpkTemplate('list'), {'kode_produk': kodeProduk.trim()});
+    if (!isSuccess(value)) throw Exception(message(value, 'Gagal memuat template SPK'));
+    return rows(value).whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+  }
+
+  // id null = tambah. Saat ubah, isiBase64 kosong = file lama dipertahankan.
+  static Future<void> spkTemplateSave({
+    int? id,
+    required String kodeProduk,
+    required String namaTemplate,
+    String namaFile = '',
+    String isiBase64 = '',
+  }) async {
+    final body = <String, dynamic>{
+      if (id != null) 'id': id,
+      'kode_produk': kodeProduk.trim(),
+      'nama_template': namaTemplate.trim(),
+      'nama_file': namaFile,
+      'isi_file': isiBase64,
+    };
+    final value = await Setuprepository.fetch(NetworkURL.setupLoanSpkTemplate(id == null ? 'create' : 'update'), body);
+    if (!isSuccess(value)) throw Exception(message(value, 'Gagal menyimpan template SPK'));
+  }
+
+  static Future<void> spkTemplateDelete(int id) async {
+    final value = await Setuprepository.fetch(NetworkURL.setupLoanSpkTemplate('delete'), {'id': id});
+    if (!isSuccess(value)) throw Exception(message(value, 'Gagal menghapus template SPK'));
+  }
+
   static Future<List<CoreCoaModel>> searchCoa({String keyword = '', int limit = 30}) {
     return SavingProductRepository.searchCoa(keyword: keyword, limit: limit);
   }

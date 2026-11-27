@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:cms_core/models/core_coa_model.dart';
 import 'package:cms_core/models/loan_product_model.dart';
 import 'package:cms_core/repository/loan_product_repository.dart';
@@ -5,6 +8,7 @@ import 'package:cms_core/utils/colors.dart';
 import 'package:cms_core/utils/dialog_loading.dart';
 import 'package:cms_core/utils/informationdialog.dart';
 import 'package:cms_core/utils/percentage_input_formatter.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -65,6 +69,7 @@ class _ProductKreditPageState extends State<ProductKreditPage> {
     'Denda & Pinalti',
     'Setup SBB',
     'Kolektibilitas',
+    'Template SPK',
   ];
 
   @override
@@ -774,11 +779,24 @@ class _ProductKreditPageState extends State<ProductKreditPage> {
             _FullWidth(child: _sbbPanel()),
           ],
         );
-      default:
+      case 5:
         return _SectionCard(
           title: 'Kolektibilitas',
           children: [
             _FullWidth(child: _collectibilityPanel()),
+          ],
+        );
+      default:
+        return _SectionCard(
+          title: 'Template SPK',
+          children: [
+            _FullWidth(
+              child: _SpkTemplatePanel(
+                key: ValueKey('spk-${c('kode_produk').text}-$_editData'),
+                kodeProduk: c('kode_produk').text.trim().toUpperCase(),
+                enabled: _editData,
+              ),
+            ),
           ],
         );
     }
@@ -1704,3 +1722,274 @@ String _normalBasePenalty(String value) {
   final v = value.toUpperCase();
   return ['PERSEN_PLAFOND', 'PERSEN_OS'].contains(v) ? v : 'PERSEN_OS';
 }
+
+
+// ---------- Template SPK ----------
+// Template SPK (.docx) per produk kredit, dipakai menu Cetak SPK di CSO.
+// Disimpan langsung ke backend (tidak menunggu tombol Simpan produk), jadi
+// hanya tersedia untuk produk yang sudah tersimpan.
+class _SpkTemplatePanel extends StatefulWidget {
+  final String kodeProduk;
+  final bool enabled;
+  const _SpkTemplatePanel({super.key, required this.kodeProduk, required this.enabled});
+
+  @override
+  State<_SpkTemplatePanel> createState() => _SpkTemplatePanelState();
+}
+
+class _SpkTemplatePanelState extends State<_SpkTemplatePanel> {
+  List<Map<String, dynamic>> _items = [];
+  bool _loading = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.enabled) _load();
+  }
+
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final items = await LoanProductRepository.spkTemplateList(widget.kodeProduk);
+      if (mounted) setState(() => _items = items);
+    } catch (e) {
+      if (mounted) setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _openEditor([Map<String, dynamic>? row]) async {
+    final saved = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => _SpkTemplateDialog(kodeProduk: widget.kodeProduk, row: row),
+    );
+    if (saved == true) await _load();
+  }
+
+  Future<void> _delete(Map<String, dynamic> row) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Hapus Template SPK'),
+        content: Text('Hapus template "${row['nama_template']}"? File template ikut terhapus dan tidak bisa dikembalikan.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Batal')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Hapus', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      await LoanProductRepository.spkTemplateDelete(_toInt(row['id']));
+      await _load();
+    } catch (e) {
+      if (mounted) setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.enabled) {
+      return const Text('Simpan produk kredit dulu, lalu buka Edit untuk menambahkan template SPK.',
+          style: TextStyle(color: Colors.black54));
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Template Word (.docx) berisi placeholder, dipakai menu Cetak SPK di CSO. Boleh lebih dari satu: '
+          'bila hanya satu langsung dipakai, bila lebih petugas memilih saat cetak. Perubahan di sini langsung tersimpan.',
+          style: TextStyle(color: Colors.black54),
+        ),
+        const SizedBox(height: 12),
+        ElevatedButton.icon(
+          onPressed: _loading ? null : () => _openEditor(),
+          style: ElevatedButton.styleFrom(backgroundColor: colorPrimary),
+          icon: const Icon(Icons.upload_file, color: Colors.white),
+          label: const Text('Tambah Template', style: TextStyle(color: Colors.white)),
+        ),
+        const SizedBox(height: 12),
+        if (_error != null) Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Text(_error!, style: const TextStyle(color: Colors.red)),
+        ),
+        if (_loading)
+          const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()))
+        else if (_items.isEmpty)
+          const Text('Belum ada template SPK untuk produk ini.')
+        else
+          // Kolom dibuat ringkas supaya Aksi terlihat tanpa menggeser tabel.
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: DataTable(
+              columnSpacing: 16,
+              horizontalMargin: 8,
+              columns: const [
+                DataColumn(label: Text('No')),
+                DataColumn(label: Text('Nama Template')),
+                DataColumn(label: Text('File')),
+                DataColumn(label: Text('Ukuran')),
+                DataColumn(label: Text('Diperbarui')),
+                DataColumn(label: Text('Aksi')),
+              ],
+              rows: List.generate(_items.length, (i) {
+                final row = _items[i];
+                final ukuran = _toInt(row['ukuran']);
+                final waktuPenuh = '${(row['updated_at'] ?? '').toString().isNotEmpty ? row['updated_at'] : row['created_at'] ?? ''}';
+                // yyyy-mm-dd hh:mm, tanpa detik.
+                final waktu = waktuPenuh.length > 16 ? waktuPenuh.substring(0, 16) : waktuPenuh;
+                return DataRow(cells: [
+                  DataCell(Text('${i + 1}')),
+                  DataCell(SizedBox(width: 160, child: Text('${row['nama_template'] ?? ''}', overflow: TextOverflow.ellipsis))),
+                  DataCell(SizedBox(width: 160, child: Text('${row['nama_file'] ?? ''}', overflow: TextOverflow.ellipsis))),
+                  DataCell(Text('${(ukuran / 1024).toStringAsFixed(1)} KB')),
+                  DataCell(Text(waktu)),
+                  DataCell(Row(mainAxisSize: MainAxisSize.min, children: [
+                    IconButton(tooltip: 'Ubah', icon: const Icon(Icons.edit, size: 18), onPressed: () => _openEditor(row)),
+                    IconButton(tooltip: 'Hapus', icon: const Icon(Icons.delete, size: 18, color: Colors.red), onPressed: () => _delete(row)),
+                  ])),
+                ]);
+              }),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _SpkTemplateDialog extends StatefulWidget {
+  final String kodeProduk;
+  final Map<String, dynamic>? row;
+  const _SpkTemplateDialog({required this.kodeProduk, this.row});
+
+  @override
+  State<_SpkTemplateDialog> createState() => _SpkTemplateDialogState();
+}
+
+class _SpkTemplateDialogState extends State<_SpkTemplateDialog> {
+  // Sama dengan batas backend (1 MB setelah decode).
+  static const _maxBytes = 1024 * 1024;
+  late final TextEditingController _nama = TextEditingController(text: '${widget.row?['nama_template'] ?? ''}');
+  String _namaFile = '';
+  Uint8List? _isi;
+  bool _busy = false;
+  String? _error;
+
+  bool get _edit => widget.row != null;
+
+  @override
+  void dispose() {
+    _nama.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pick() async {
+    final res = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['docx'], withData: true);
+    final file = res?.files.single;
+    if (file == null || file.bytes == null) return;
+    if (!file.name.toLowerCase().endsWith('.docx')) {
+      setState(() => _error = 'File harus berformat .docx (Word).');
+      return;
+    }
+    if (file.bytes!.length > _maxBytes) {
+      setState(() => _error = 'Ukuran template maksimal 1 MB.');
+      return;
+    }
+    setState(() {
+      _namaFile = file.name;
+      _isi = file.bytes;
+      _error = null;
+      if (_nama.text.trim().isEmpty) _nama.text = file.name.replaceAll(RegExp(r'\.docx$', caseSensitive: false), '');
+    });
+  }
+
+  Future<void> _save() async {
+    if (_nama.text.trim().isEmpty) {
+      setState(() => _error = 'Nama template wajib diisi.');
+      return;
+    }
+    if (!_edit && _isi == null) {
+      setState(() => _error = 'Pilih file template (.docx) dulu.');
+      return;
+    }
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await LoanProductRepository.spkTemplateSave(
+        id: _edit ? _toInt(widget.row!['id']) : null,
+        kodeProduk: widget.kodeProduk,
+        namaTemplate: _nama.text.trim(),
+        namaFile: _namaFile,
+        isiBase64: _isi == null ? '' : base64Encode(_isi!),
+      );
+      if (mounted) Navigator.pop(context, true);
+    } catch (e) {
+      if (mounted) setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final fileLama = '${widget.row?['nama_file'] ?? ''}';
+    return AlertDialog(
+      title: Text(_edit ? 'Ubah Template SPK' : 'Tambah Template SPK'),
+      content: SizedBox(
+        width: 460,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _nama,
+              maxLength: 100,
+              decoration: const InputDecoration(labelText: 'Nama Template *', hintText: 'mis. SPK Umum'),
+            ),
+            const SizedBox(height: 8),
+            Row(children: [
+              OutlinedButton.icon(
+                onPressed: _busy ? null : _pick,
+                icon: const Icon(Icons.attach_file),
+                label: Text(_edit ? 'Ganti File' : 'Pilih File .docx'),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  _namaFile.isNotEmpty ? _namaFile : (_edit ? '$fileLama (tetap)' : 'Belum ada file'),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ]),
+            if (_error != null) Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Text(_error!, style: const TextStyle(color: Colors.red)),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: _busy ? null : () => Navigator.pop(context, false), child: const Text('Batal')),
+        ElevatedButton(
+          onPressed: _busy ? null : _save,
+          style: ElevatedButton.styleFrom(backgroundColor: colorPrimary),
+          child: Text(_busy ? 'Menyimpan...' : 'Simpan', style: const TextStyle(color: Colors.white)),
+        ),
+      ],
+    );
+  }
+}
+
+int _toInt(dynamic v) => v is num ? v.toInt() : int.tryParse('${v ?? ''}') ?? 0;

@@ -37,8 +37,27 @@ class ThirdPartyModel {
 String bankingText(dynamic value) =>
     value == null ? '' : value.toString().trim();
 
+// Jenis kelompok mitra bisnis: daftar tetap di backend (kolom `kelompok`).
+// Berbeda dengan Kelompok Mitra (grup dari menu setup, kode_kelompok).
+const jenisKelompokMitra = <String, String>{
+  'asuransi': 'Asuransi',
+  'developer': 'Developer',
+  'dealer': 'Dealer',
+  'notaris': 'Notaris',
+  'bank': 'Bank',
+  'lembaga_keuangan_lainnya': 'Lembaga Keuangan Lainnya',
+  'organisasi_guru': 'Organisasi Guru',
+  'organisasi_lainnya': 'Organisasi Lainnya',
+  'instansi_pemerintah': 'Instansi Pemerintah',
+  'perguruan_tinggi': 'Perguruan Tinggi',
+  'lembaga_sekolah': 'Lembaga Sekolah',
+  'pt': 'PT',
+  'lainnya': 'Lainnya',
+};
+
 const partyInputKeys = <String>[
   'kode_pihak_ketiga',
+  'jenis_kelompok',
   'kode_kelompok',
   'nama_perusahaan',
   'alamat',
@@ -112,7 +131,7 @@ Map<String, dynamic> abaFormPayload({
 };
 
 Map<String, dynamic> partyGroupFormPayload(Map<String, String> fields) => {
-  for (final key in ['kode_kelompok', 'nama_kelompok', 'nomor_sbb'])
+  for (final key in ['kode_kelompok', 'nama_kelompok', 'nomor_sbb', 'nama_sbb'])
     key: (fields[key] ?? '').trim(),
 };
 
@@ -124,7 +143,9 @@ ThirdPartyModel mitraFormModel(Map<String, dynamic> raw) => ThirdPartyModel({
   ...raw,
   'kode_pihak_ketiga': raw['kode_mitra'] ?? raw['kode_pihak_ketiga'],
   'nama_perusahaan': raw['nama_mitra'] ?? raw['nama_perusahaan'],
-  'kode_kelompok': raw['kelompok'] ?? raw['kode_kelompok'],
+  'jenis_kelompok': raw['kelompok'] ?? raw['jenis_kelompok'],
+  'kode_kelompok': raw['kode_kelompok_mitra'] ?? raw['kode_kelompok'],
+  'nama_kelompok': raw['nama_kelompok_mitra'] ?? raw['nama_kelompok'],
   'nama_pic_1': raw['nama_pic'] ?? raw['nama_pic_1'],
   'no_hp_1': raw['nomor_hp_pic'] ?? raw['no_hp_1'],
   'no_telp': raw['nomor_telp_pic'] ?? raw['no_telp'],
@@ -135,7 +156,8 @@ Map<String, dynamic> mitraFormPayload(Map<String, dynamic> body) {
   final result = Map<String, dynamic>.from(body);
   const aliases = {
     'kode_pihak_ketiga': 'kode_mitra', 'nama_perusahaan': 'nama_mitra',
-    'kode_kelompok': 'kelompok', 'nama_pic_1': 'nama_pic',
+    'jenis_kelompok': 'kelompok', 'kode_kelompok': 'kode_kelompok_mitra',
+    'nama_pic_1': 'nama_pic',
     'no_hp_1': 'nomor_hp_pic', 'no_telp': 'nomor_telp_pic',
     'sandi_bank': 'bank_rekening',
   };
