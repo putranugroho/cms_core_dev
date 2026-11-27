@@ -935,8 +935,9 @@ class NetworkURL {
   }
 
   static String thirdPartyCapabilities() => "$url/core/third-party/capabilities";
-  // Kelompok Mitra (master-service): kode, nama, SBB fee mitra.
-  static String partyGroupEndpoint(String action) => "$url/master/kelompok-mitra/$action";
+  // Kelompok Mitra: middleware meneruskan ke master-service /master/kelompok-mitra
+  // (env CORE_PARTY_GROUP_GATEWAY_PATH).
+  static String partyGroupEndpoint(String action) => "$url/setup/kelompok-pihak-ketiga/$action";
   static String thirdPartyEndpoint(String action) => "$url/setup/data-pihak-ketiga/$action";
 
   static String masterInventarisList() {

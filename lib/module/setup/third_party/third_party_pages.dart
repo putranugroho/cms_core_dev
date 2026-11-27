@@ -23,7 +23,8 @@ class _PartyGroupPageState
     'kode_kelompok': 'Kode Kelompok',
   };
   @override
-  Future<bool> serviceAvailable() => Future.value(true);
+  Future<bool> serviceAvailable() =>
+      BankingSetupRepository.partyAvailable(group: true);
   @override
   Future<BankingPage<PartyGroupModel>> fetchPage() =>
       BankingSetupRepository.groupList(
