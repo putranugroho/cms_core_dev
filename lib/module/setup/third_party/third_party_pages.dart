@@ -290,7 +290,8 @@ class _MitraBisnisFormPageState
   Widget buildTable(List<ThirdPartyModel> items) => bankingTable(
     [
       'Kode',
-      'Kelompok',
+      'Jenis',
+      'Kelompok Mitra',
       'Nama Perusahaan',
       'Kota',
       'No Telp',
@@ -303,7 +304,8 @@ class _MitraBisnisFormPageState
           (row) => DataRow(
             cells: [
               DataCell(Text(row.kode)),
-              DataCell(Text('${row.kodeKelompok} • ${row.namaKelompok}')),
+              DataCell(Text(jenisKelompokMitra[row.field('jenis_kelompok')] ?? row.field('jenis_kelompok'))),
+              DataCell(Text(row.kodeKelompok.isEmpty ? '-' : '${row.kodeKelompok} • ${row.namaKelompok}')),
               DataCell(Text(row.nama)),
               DataCell(Text(row.field('kota'))),
               DataCell(Text(row.field('no_telp'))),
@@ -465,8 +467,27 @@ class _ThirdPartyFormState extends State<_ThirdPartyForm> {
         required: !widget.readOnly,
         readOnly: widget.readOnly || widget.original != null,
       ),
-      // Kelompok wajib dipilih dari Kelompok Mitra; SBB fee mitra di data
-      // kredit diambil dari kelompok ini.
+      // Jenis: daftar tetap. Kelompok Mitra: grup dari menu setup, wajib;
+      // SBB fee mitra di data kredit diambil dari kelompok ini.
+      Padding(
+        padding: const EdgeInsets.only(bottom: 14),
+        child: DropdownButtonFormField<String>(
+          initialValue: jenisKelompokMitra.containsKey(_field('jenis_kelompok').text) ? _field('jenis_kelompok').text : null,
+          decoration: InputDecoration(
+            labelText: widget.readOnly ? 'Jenis Kelompok' : 'Jenis Kelompok *',
+            border: const OutlineInputBorder(),
+          ),
+          items: jenisKelompokMitra.entries
+              .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
+              .toList(),
+          onChanged: widget.readOnly
+              ? null
+              : (v) => setState(() => _field('jenis_kelompok').text = v ?? ''),
+          validator: widget.readOnly
+              ? null
+              : (v) => (v == null || v.isEmpty) ? 'Pilih jenis kelompok' : null,
+        ),
+      ),
       bankingField(
         'Kelompok Mitra',
         _field('kode_kelompok'),
