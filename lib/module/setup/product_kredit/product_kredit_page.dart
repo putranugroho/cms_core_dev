@@ -1834,9 +1834,12 @@ class _SpkTemplatePanelState extends State<_SpkTemplatePanel> {
         else if (_items.isEmpty)
           const Text('Belum ada template SPK untuk produk ini.')
         else
+          // Kolom dibuat ringkas supaya Aksi terlihat tanpa menggeser tabel.
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: DataTable(
+              columnSpacing: 16,
+              horizontalMargin: 8,
               columns: const [
                 DataColumn(label: Text('No')),
                 DataColumn(label: Text('Nama Template')),
@@ -1848,14 +1851,16 @@ class _SpkTemplatePanelState extends State<_SpkTemplatePanel> {
               rows: List.generate(_items.length, (i) {
                 final row = _items[i];
                 final ukuran = _toInt(row['ukuran']);
-                final waktu = (row['updated_at'] ?? '').toString().isNotEmpty ? row['updated_at'] : row['created_at'];
+                final waktuPenuh = '${(row['updated_at'] ?? '').toString().isNotEmpty ? row['updated_at'] : row['created_at'] ?? ''}';
+                // yyyy-mm-dd hh:mm, tanpa detik.
+                final waktu = waktuPenuh.length > 16 ? waktuPenuh.substring(0, 16) : waktuPenuh;
                 return DataRow(cells: [
                   DataCell(Text('${i + 1}')),
-                  DataCell(Text('${row['nama_template'] ?? ''}')),
-                  DataCell(Text('${row['nama_file'] ?? ''}')),
+                  DataCell(SizedBox(width: 160, child: Text('${row['nama_template'] ?? ''}', overflow: TextOverflow.ellipsis))),
+                  DataCell(SizedBox(width: 160, child: Text('${row['nama_file'] ?? ''}', overflow: TextOverflow.ellipsis))),
                   DataCell(Text('${(ukuran / 1024).toStringAsFixed(1)} KB')),
-                  DataCell(Text('${waktu ?? ''}')),
-                  DataCell(Row(children: [
+                  DataCell(Text(waktu)),
+                  DataCell(Row(mainAxisSize: MainAxisSize.min, children: [
                     IconButton(tooltip: 'Ubah', icon: const Icon(Icons.edit, size: 18), onPressed: () => _openEditor(row)),
                     IconButton(tooltip: 'Hapus', icon: const Icon(Icons.delete, size: 18, color: Colors.red), onPressed: () => _delete(row)),
                   ])),
